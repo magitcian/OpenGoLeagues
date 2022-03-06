@@ -16,9 +16,11 @@ module.exports = (sequelize, DataTypes) => {
 
     League.associate = (models) => {
         League.belongsTo(models.Manager);
+        //League.belongsTo(models.User, {foreignKey: 'ManagerUserId'});
         // League.hasMany(models.Player, {
         //     onDelete: "cascade",
         // });
+        //League.belongsTo(models.Subscribe);
         League.belongsToMany(models.Player, { through: models.Subscribe });
         League.hasMany(models.Subscribe, {
             onDelete: "SET NULL",

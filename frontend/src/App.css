@@ -11,7 +11,7 @@ body {
   padding: 0;
 }
 
-.post {
+.league {
   width: 400px;
   height: 300px;
   border-radius: 10px;
@@ -24,11 +24,11 @@ body {
   box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
 }
 
-.post:hover {
+.league:hover {
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
   cursor: pointer;
 }
-.post .title {
+.league .title {
   flex: 20%;
   border-bottom: 1px solid lightgray;
   background-color: dodgerblue;
@@ -37,13 +37,13 @@ body {
   color: white;
 }
 
-.post .body {
+.league .body {
   flex: 60%;
   display: grid;
   place-content: center;
 }
 
-.post .footer {
+.league .footer {
   flex: 20%;
   border-top: 1px solid lightgray;
   display: flex;
@@ -172,7 +172,7 @@ span {
 }
 
 /* INDIVIDUAL POST */
-.postPage {
+.leaguePage {
   display: flex;
   flex-direction: row;
   width: 100%;

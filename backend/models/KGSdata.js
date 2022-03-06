@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     KGSdata.associate = (models) => {
-        KGSdata.belongsTo(models.User);
+        KGSdata.belongsTo(models.Player);
     };
 
     return KGSdata;

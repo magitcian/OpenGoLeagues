@@ -22,9 +22,7 @@ module.exports = (sequelize, DataTypes) => {
         // User.hasOne(models.Player, {
         //     onDelete: "CASCADE",
         // });
-        User.hasOne(models.KGSdata, {
-            onDelete: "CASCADE",
-        });
+
     };
 
     return User;

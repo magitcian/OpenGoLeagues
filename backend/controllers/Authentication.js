@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { User } = require("../models");
+const { User, Manager, Player } = require("../models");
 const bcrypt = require("bcrypt");
 const { validateToken } = require("../middlewares/AuthMiddleware");
 const { sign } = require("jsonwebtoken");
@@ -22,23 +22,36 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ where: { email: email } });
-
+  
   if (!user) res.json({ error: "User doesn't exist" });
 
+  const isUserManager = await isManager(user.id);
   bcrypt.compare(password, user.password).then(async (match) => {
     if (!match) res.json({ error: "Wrong email and password combination" });
 
-    const accessToken = sign(
-      { firstName: user.firstName, lastName: user.lastName, email: user.email, id: user.id },
+    const accessToken = sign( //ici qu'on enregistre l'utilisateur dans le token?
+      { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, isManager: isUserManager},
       "importantsecret"
     );
-    res.json({ token: accessToken, firstName: user.firstName, lastName: user.lastName, email: email, id: user.id });
+    res.json({ token: accessToken, id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, isManager: isUserManager });
   });
 });
 
-router.get("/auth", validateToken, (req, res) => { //validateToken : uniquement pour les personnes connectées
+router.get("/auth", validateToken, async (req, res) => { //validateToken : uniquement pour les personnes connectées
+  //console.log(req.user);
+  //req.user.isManager = await isManager(req.user.id); //plus nécessaire puisqu'enregistré dans le sign/token
   res.json(req.user);
 });
+
+async function isManager(userId) {
+  const manager = await Manager.findOne({ where: { UserId: userId } });
+  let isManager =false;
+  if (manager){
+    isManager = true;
+  }
+  console.log(isManager);
+  return isManager;  
+}
 
 router.get("/basicinfo/:id",validateToken, async (req, res) => { 
   const id = req.params.id;

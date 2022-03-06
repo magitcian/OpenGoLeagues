@@ -25,6 +25,7 @@ function Login() {
           email: response.data.email,
           id: response.data.id,
           status: true,
+          isManager: response.data.isManager,
         });
         navigate("/");
       }

@@ -1,9 +1,13 @@
 module.exports = (sequelize, DataTypes) => {
     const Subscribe = sequelize.define("Subscribe", {
-
+        // PlayerId: {
+        //     type: DataTypes.INTEGER,
+        //     foreignKey: true
+        // },
     });
 
     Subscribe.associate = (models) => {
+        //Subscribe.belongsTo(models.Player, {as:'PlayerId', foreignKey: 'UserId'});
         Subscribe.belongsTo(models.Player);
         Subscribe.belongsTo(models.League);
     };

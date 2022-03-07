@@ -23,6 +23,9 @@ db.sequelize.sync().then(async() => {
     // await init.deleteDataInDB();
     // await init.addDataInDB();
 
+    const testLeelaz = require("./testLeelaz");
+    testLeelaz.leelaz();
+
     app.listen(3001, async() => {
         console.log("Server running on port 3001");
     });

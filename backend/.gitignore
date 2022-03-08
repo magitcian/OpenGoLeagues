@@ -3,3 +3,4 @@
 # dependencies
 /node_modules
 /data/OpenGoLeagues.db
+/SGFfiles/*

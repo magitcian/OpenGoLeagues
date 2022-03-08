@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import PageNotFound from "./pages/PageNotFound";
 import LeagueSubscribed from "./pages/LeagueSubscribed";
 import LeagueNotSubscribed from "./pages/LeagueNotSubscribed";
+import CheatAnalysis from "./pages/CheatAnalysis";
 import { AuthContext } from "./helpers/AuthContext";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -70,6 +71,7 @@ function App() {
                                     <Link to="/"> Home</Link>
                                     <Link to="/LeagueSubscribed"> Your leagues</Link>
                                     <Link to="/LeagueNotSubscribed"> Other leagues</Link>
+                                    <Link to="/CheatAnalysis"> Cheat analysis</Link>
                                 </>
                             )}
                         </div>
@@ -89,6 +91,7 @@ function App() {
                                 <Route path="/" element={<Home />} />
                                 <Route path="/LeagueSubscribed" element={<LeagueSubscribed />} />
                                 <Route path="/LeagueNotSubscribed" element={<LeagueNotSubscribed />} />
+                                <Route path="/CheatAnalysis" element={<CheatAnalysis />} />
                             </>
                         )}
                         <Route path='*' element={<PageNotFound />} />

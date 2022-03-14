@@ -160,10 +160,6 @@ router.get("/generateAnalyzeOnWindows", validateToken, async (req, res) => {
         rep_analyze += data.toString();
     });
 
-    bat.on('exit', (code) => {
-        console.log(`Child exited with code ${code}`);
-    });
-
 
     bat.stdin.write("1 loadsgf ./SGFfiles/34485608-206-EdIV-dartagaluc.sgf \n");
     await sleep(2000);
@@ -182,8 +178,115 @@ router.get("/generateAnalyzeOnWindows", validateToken, async (req, res) => {
         await sleep(1000);
     }
 
+    bat.on('exit', (code) => {
+        console.log(`Child exited with code ${code}`);
+    });
+
     res.json({ rep: rep });
 });
+
+router.get("/generateAnalyzeOnLinux", validateToken, async (req, res) => {
+
+    // list_commands= 
+    // protocol_version
+    // name
+    // version
+    // quit
+    // known_command
+    // list_commands
+    // boardsize
+    // clear_board
+    // komi
+    // play
+    // genmove
+    // showboard
+    // undo
+    // final_score
+    // final_status_list
+    // time_settings
+    // time_left
+    // fixed_handicap
+    // place_free_handicap
+    // set_free_handicap
+    // loadsgf
+    // printsgf
+    // kgs-genmove_cleanup
+    // kgs-time_settings
+    // kgs-game_over
+    // heatmap
+    // lz-analyze
+    // lz-genmove_analyze
+
+    //utilisation de lz-analyze: "lz-analyze 1 b"
+    
+    const { spawn } = require('child_process');
+    const bat = spawn('../leelaZero/linux/leela-zero/build/leelaz', ['-w', '../leelaZero/win/leela-zero-0.17-win64/networks/best-network', '-g', '--lagbuffer', '0']);
+
+    const fs = require('fs')
+    let rep = "";
+    let fini = false;
+
+    let i = 0;
+    let rep_move = "";
+    let rep_analyze = "";
+    //utiliser 2 variables différentes pour stdout (pour le move_history) et stderr (pour les analyses). 
+    //puis faire un split sur chacune des 2 variables
+    //analyser ces 2 variables avec une fonction qui s'exécute à la fin de l'analyse par leela-zero
+
+    bat.stdout.on('data', async (data) => {
+        rep_move += data.toString();
+        // rep1 = data.toString();
+        console.log(data.toString());
+        if (rep_move.includes("cannot undo")) {
+            fini = true;
+            fs.writeFile('./SGFfiles/log_rep.txt', rep_move, err => {
+                if (err) {
+                    console.error(err)
+                    return
+                }
+            })
+            fs.writeFile('./SGFfiles/log_analyze.txt', rep_analyze, err => {
+                if (err) {
+                    console.error(err)
+                    return
+                }
+            })
+            console.log("finish!");
+            bat.kill();
+        }
+    });
+
+    bat.stderr.on('data', (data) => {
+        rep_analyze += data.toString();
+    });
+
+
+    bat.stdin.write("1 loadsgf ./SGFfiles/34485608-206-EdIV-dartagaluc.sgf \n");
+    await sleep(2000);
+    // bat.stdin.write("2 lz-setoption name visits value 1000 \n");
+    // await sleep(500);
+    // bat.stdin.write("3 move_history \n");
+    // await sleep(500);
+    i = 3;
+    let str = "b";
+    while (!fini) {
+        console.log(i++);
+        // bat.stdin.write(i.toString() + " last_move \n");
+        // await sleep(500);
+        bat.stdin.write(i.toString() + " undo \n");
+        await sleep(500);
+        bat.stdin.write(i.toString() + " lz-analyze 0 \n");
+        await sleep(2000);
+    }
+
+    bat.on('exit', (code) => {
+        console.log(`Child exited with code ${code}`);
+    });
+
+
+    res.json({ rep: rep });
+});
+
 
 
 router.get("/analyzeFile", validateToken, async (req, res) => {

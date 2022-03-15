@@ -16,8 +16,8 @@ const leagueRouter = require("./controllers/League");
 app.use("/league", leagueRouter);
 const subRouter = require("./controllers/Subscribe");
 app.use("/subscribe", subRouter);
-const leelaRouter = require("./controllers/LeelaZero");
-app.use("/LeelaZero", leelaRouter);
+// const leelaRouter = require("./controllers/LeelaZero");
+// app.use("/LeelaZero", leelaRouter);
 const SGFRouter = require("./controllers/SGFfile");
 app.use("/SGFfile", SGFRouter);
 

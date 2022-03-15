@@ -1,24 +1,4 @@
-const express = require("express");
-const router = express.Router();
-const { validateToken } = require("../middlewares/AuthMiddleware");
-const Sequelize = require('sequelize');
-
-
-router.get("/generateAnalyzeOnWindows", validateToken, async (req, res) => {
-    //const bat = spawn('../leelaZero/win/leela-zero-0.17-win64/leelaz.exe', ['-w', '..\\leelaZero\\win\\leela-zero-0.17-win64\\networks\\best-network', '-g', '--lagbuffer', '0']);
-    analyzeFile("w", '34485608-206-EdIV-dartagaluc.sgf');
-
-    res.json({ rep: "In progress" });
-});
-
-router.get("/generateAnalyzeOnLinux", validateToken, async (req, res) => {
-    //const bat = spawn('../leelaZero/linux/leela-zero/build/leelaz', ['-w', '../leelaZero/win/leela-zero-0.17-win64/networks/best-network', '-g', '--lagbuffer', '0']);
-    analyzeFile("l", '34485608-206-EdIV-dartagaluc.sgf');
-
-    res.json({ rep: "In progress" });
-});
-
-async function analyzeFile(OStype, sgfPath) {
+async function analyzeFileWithLeela(OStype, sgfPath) {
     const { spawn } = require('child_process');
     let leelazPath = "";
     let networkPath = "";
@@ -39,15 +19,18 @@ async function analyzeFile(OStype, sgfPath) {
     bat.stdout.on('data', async (data) => {
         rep_move += data.toString();
         console.log(data.toString());
-        if (rep_move.includes("cannot undo")) {
+        if (rep_move.includes("cannot undo") && !fini) {
             fini = true;
-            fs.writeFile('./SGFfiles/log_analyze.txt', rep_analyze, err => {
+            fs.writeFile(sgfPath.substring(0,sgfPath.length -4) + '_analyze.txt', rep_analyze, err => {
                 if (err) {
                     console.error(err)
                     return
+                }else{
+                    finalAnalyze(sgfPath);
                 }
             })
             console.log("finish!");
+            bat.stdin.write("quit\n");
             bat.kill();
         }
     });
@@ -58,9 +41,9 @@ async function analyzeFile(OStype, sgfPath) {
     });
 
     let i = 1;
-    bat.stdin.write(i.toString() + " loadsgf ./SGFfiles/" + sgfPath + "\n");
+    bat.stdin.write(i.toString() + " loadsgf " + sgfPath + "\n");
     if (OStype == "w") {
-        bat.stdin.write(i.toString() + " lz-setoption name visits value 1000\n");
+        bat.stdin.write(i.toString() + " lz-setoption name visits value 100\n");
     }
     await sleep(2000);
     while (!fini) {
@@ -70,7 +53,7 @@ async function analyzeFile(OStype, sgfPath) {
         bat.stdin.write(i.toString() + " undo \n");
         await sleep(500);
         bat.stdin.write(i.toString() + " lz-analyze 0 \n");
-        await sleep(10000);
+        await sleep(5000);
     }
 
 
@@ -79,14 +62,17 @@ async function analyzeFile(OStype, sgfPath) {
     });
 }
 
-router.get("/analyzeFile", validateToken, async (req, res) => {
+//pour lancer à part dans le terminal backend/controllers: 
+//node -e 'require("./LeelaZero").finalAnalyze("../SGFfiles/liusasori-pinenisan2_2022-03-15_22.37.49.sgf")'
+
+function finalAnalyze(sgfPath) {
     const fs = require('fs');
     let rep_move = "";
     let rep_analyze = "";
 
-    fs.readFile('./SGFfiles/34485608-206-EdIV-dartagaluc.sgf', 'utf8', function (err, data_move) {
+    fs.readFile(sgfPath, 'utf8', function (err, data_move) {
         rep_move = data_move;
-        fs.readFile('./SGFfiles/log_analyze.txt', 'utf8', function (err, data_analyze) {
+        fs.readFile(sgfPath.substring(0,sgfPath.length -4) + '_analyze.txt', 'utf8', function (err, data_analyze) {
             rep_analyze = data_analyze;
 
             let countCorrespond1White = 0;
@@ -100,7 +86,6 @@ router.get("/analyzeFile", validateToken, async (req, res) => {
             let countAucuneCorrespBlack = 0;
 
             let analyzes = rep_analyze.split("NN eval=");
-            //console.log(analyzes[3]);
 
             let moves = rep_move.split(";");
             let listOfMoves = new Array();
@@ -138,11 +123,11 @@ router.get("/analyzeFile", validateToken, async (req, res) => {
             
             for (let m = 0; m < countMove; ++m) {
                 //console.log(analyzes);
-                let analyzes2 = analyzes[listOfMoves.length - m].split("\r\n");
+                let analyzes2 = analyzes[listOfMoves.length - m].split("\r\n"); // "\n" : sur linux
                 let analyzes3 = analyzes2[2].split("->");
                 let analyze1 ={
                     "position":analyzes3[0].trim(),
-                    "pourcent":analyzes3[1].substring(12,18),
+                    "pourcent":analyzes3[1].substring(12,18).trim(),
                 }
                 // let prop1 = analyzes3[0].trim();
                 // let pourcent = analyzes3[1].substring(12,18);
@@ -150,7 +135,7 @@ router.get("/analyzeFile", validateToken, async (req, res) => {
                 analyzes3 = analyzes2[3].split("->");
                 let analyze2 ={
                     "position":analyzes3[0].trim(),
-                    "pourcent":analyzes3[1].substring(12,18),
+                    "pourcent":analyzes3[1].substring(12,18).trim(),
                 }
                 // let prop2 = analyzes3[0].trim();
                 let move = listOfMoves[m];
@@ -159,12 +144,12 @@ router.get("/analyzeFile", validateToken, async (req, res) => {
                 console.log("prop2: " + analyze2.position);
                 console.log("pourc2: " + analyze2.pourcent);
                 console.log("move: " + move.posLeela);
-                
+                //console.log("dif pourcent: " + Math.abs(analyze1.pourcent - analyze2.pourcent));
 
                 if (move.colorShort == "W") {
                     if (move.posLeela == analyze1.position) {
                         ++countCorrespond1White;
-                    } else if (move.posLeela == analyze2.position) {
+                    } else if (move.posLeela == analyze2.position && Math.abs(analyze1.pourcent - analyze2.pourcent) < 2.5) {
                         ++countCorrespond2White;
                     } else {
                         ++countCorrespPasWhite;
@@ -172,7 +157,7 @@ router.get("/analyzeFile", validateToken, async (req, res) => {
                 } else if (move.colorShort == "B") {
                     if (move.posLeela == analyze1.position) {
                         ++countCorrespond1Black;
-                    } else if (move.posLeela == analyze2.position) {
+                    } else if (move.posLeela == analyze2.position && Math.abs(analyze1.pourcent - analyze2.pourcent) < 2.5) {
                         ++countCorrespond2Black;
                     } else {
                         ++countCorrespPasBlack;
@@ -207,9 +192,7 @@ router.get("/analyzeFile", validateToken, async (req, res) => {
 
         });
     });
-
-    res.json({ rep: "rep" });
-});
+};
 
 
 
@@ -219,4 +202,4 @@ function sleep(ms) {
     });
 }
 
-module.exports = router;
+module.exports = { analyzeFileWithLeela, finalAnalyze };

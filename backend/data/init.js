@@ -1,4 +1,4 @@
-const { User, Level, Game, KGSdata, League, LevelHistory, Manager, Participate, Player, Subscribe, Tournament } = require("../models");
+const { User, Level, Game, KGSdata, League, LevelHistory, Manager, Participate, Player, Subscribe, Tournament, AnalyzedGame } = require("../models");
 
 async function deleteDataInDB() {
 
@@ -53,6 +53,11 @@ async function deleteDataInDB() {
   });
 
   await Tournament.destroy({
+    where: {},
+    truncate: true
+  });
+
+  await AnalyzedGame.destroy({
     where: {},
     truncate: true
   });

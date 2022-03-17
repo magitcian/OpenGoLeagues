@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router();
 const cors = require('cors')
 const multer = require('multer')
-
+const { validateToken } = require("../middlewares/AuthMiddleware");
 
 let newFileName = "";
 let originalFileName = "";
@@ -21,12 +21,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
-router.post('/upload', upload.single('file'), function (req, res) {
-  console.log(fileDestination + newFileName);
-  const leela = require("./LeelaZero");
-  leela.analyzeFileWithLeela("w", fileDestination + newFileName);
-  //leela.finalAnalyze(fileDestination + newFileName);
-  res.json({rep :""})
+router.post('/upload',validateToken, upload.single('file'), function (req, res) {
+  //console.log(fileDestination + newFileName);
+
+  res.json({newFileName : newFileName})
 })
 
 function formatDate() { //yyyy-mm-dd hh:mm:ss

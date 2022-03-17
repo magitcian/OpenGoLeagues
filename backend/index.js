@@ -24,10 +24,10 @@ const SGFRouter = require("./controllers/SGFfile");
 app.use("/SGFfile", SGFRouter);
 
 db.sequelize.sync().then(async() => {
-    // //Initialize data in DB
-    // const init = require("./data/init");
-    // await init.deleteDataInDB();
-    // await init.addDataInDB();
+    //Initialize data in DB
+    const init = require("./data/init");
+    await init.deleteDataInDB();
+    await init.addDataInDB();
 
     app.listen(3001, async() => {
         console.log("Server running on port 3001");

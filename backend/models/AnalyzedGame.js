@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
     const AnalyzedGame = sequelize.define("AnalyzedGame", {
-        SGFilePath: {
+        SgfFileName: {
             type: DataTypes.STRING,
             allowNull: false,
         },

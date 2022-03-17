@@ -38,11 +38,12 @@ function CheatAnalysis() {
       headers: { accessToken: localStorage.getItem("accessToken") },
     }).then(response => response.json())
       .then(response => {
-        //console.log(response.newFileName)
+        //console.log(response.analyzedGame)
+        setListOfAnalyzedGame([...listOfAnalyzedGame, response.analyzedGame]);
         axios
           .post("http://localhost:3001/LeelaZero/analyzed",
             {
-              fileName: response.newFileName,
+              fileId: response.analyzedGame.id,
             },
             {
               headers: { accessToken: localStorage.getItem("accessToken") },
@@ -107,41 +108,56 @@ function CheatAnalysis() {
             <th>TotMoves</th>
           </tr>
         </thead>
-        <tbody>
-          {listOfAnalyzedGame.map((value, key) => {
-            return (
-              <tr key={key}>
-                <td className="toLeft">
-                  {value.SGFilePath}
-                </td>
-                <td >
-                  {value.CorrespNumOfMoves1Black}
-                </td>
-                <td>
-                  {value.CorrespNumOfMoves2Black}
-                </td>
-                <td>
-                  {value.UnexpectedMovesBlack}
-                </td>
-                <td>
-                  {value.TotalAnalyzedMovesBlack}
-                </td>
-                <td >
-                  {value.CorrespNumOfMoves1White}
-                </td>
-                <td>
-                  {value.CorrespNumOfMoves2White}
-                </td>
-                <td>
-                  {value.UnexpectedMovesWhite}
-                </td>
-                <td>
-                  {value.TotalAnalyzedMovesWhite}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
+
+        {listOfAnalyzedGame.map((value, key) => {
+          return (
+            <tbody key={key}>
+              {value.TotalAnalyzedMovesBlack + value.TotalAnalyzedMovesWhite == 0 ? (
+                <tr >
+                  <td className="toLeft">
+                    {value.SgfFileName}
+                  </td>
+                  <td colSpan="8">
+                    Analyze in progress! Waiting response from server.
+                  </td>
+                </tr>
+              ) : (
+                <tr>
+                  <td className="toLeft">
+                    {value.SgfFileName}
+                  </td>
+                  <td >
+                    {value.CorrespNumOfMoves1Black}
+                  </td>
+                  <td>
+                    {value.CorrespNumOfMoves2Black}
+                  </td>
+                  <td>
+                    {value.UnexpectedMovesBlack}
+                  </td>
+                  <td>
+                    {value.TotalAnalyzedMovesBlack}
+                  </td>
+                  <td >
+                    {value.CorrespNumOfMoves1White}
+                  </td>
+                  <td>
+                    {value.CorrespNumOfMoves2White}
+                  </td>
+                  <td>
+                    {value.UnexpectedMovesWhite}
+                  </td>
+                  <td>
+                    {value.TotalAnalyzedMovesWhite}
+                  </td>
+                </tr>
+              )
+              }
+            </tbody>
+
+          );
+        })}
+
       </table>
     </div>
   );

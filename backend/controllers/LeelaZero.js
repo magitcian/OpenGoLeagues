@@ -6,15 +6,17 @@ const { validateToken } = require("../middlewares/AuthMiddleware");
 
 let fileDestination = "./SGFfiles/";
 let userID = 0;
-router.post('/analyzed',validateToken, function (req, res) {
-    const { fileName } = req.body;
-    userID = req.user.id;
-    console.log(userID);
-    analyzeFileWithLeela("w", fileName);
-    //leela.finalAnalyze(fileDestination + newFileName);
-  
-    res.json({rep :fileName})
-  })
+router.post('/analyzed', validateToken, async function (req, res) {
+    const { fileId } = req.body;
+    const sgfFile = await AnalyzedGame.findOne({ where: { id: fileId, PlayerUserId: req.user.id } });
+    if (sgfFile) {
+        //console.log(sgfFile.SgfFileName);
+        userID = sgfFile.PlayerUserId;
+        analyzeFileWithLeela("w", sgfFile.SgfFileName);
+        //leela.finalAnalyze(fileDestination + newFileName);
+    }
+    res.json({ rep: "in progress!" })
+})
 
 
 async function analyzeFileWithLeela(OStype, sgfFileName) {
@@ -40,11 +42,11 @@ async function analyzeFileWithLeela(OStype, sgfFileName) {
         console.log(data.toString());
         if (rep_move.includes("cannot undo") && !fini) {
             fini = true;
-            fs.writeFile(fileDestination + sgfFileName.substring(0,sgfFileName.length -4) + '_analyze.txt', rep_analyze, err => {
+            fs.writeFile(fileDestination + sgfFileName.substring(0, sgfFileName.length - 4) + '_analyze.txt', rep_analyze, err => {
                 if (err) {
                     console.error(err)
                     return
-                }else{
+                } else {
                     finalAnalyze(sgfFileName);
                 }
             })
@@ -72,7 +74,7 @@ async function analyzeFileWithLeela(OStype, sgfFileName) {
         bat.stdin.write(i.toString() + " undo \n");
         await sleep(500);
         bat.stdin.write(i.toString() + " lz-analyze 0 \n");
-        await sleep(5000);
+        await sleep(1000);
     }
 
 
@@ -81,14 +83,14 @@ async function analyzeFileWithLeela(OStype, sgfFileName) {
     });
 }
 
- function finalAnalyze(sgfFileName) {
+function finalAnalyze(sgfFileName) {
     const fs = require('fs');
     let rep_move = "";
     let rep_analyze = "";
 
-    fs.readFile(fileDestination +sgfFileName, 'utf8', function (err, data_move) {
+    fs.readFile(fileDestination + sgfFileName, 'utf8', function (err, data_move) {
         rep_move = data_move;
-        fs.readFile(fileDestination + sgfFileName.substring(0,sgfFileName.length -4) + '_analyze.txt', 'utf8', async function (err, data_analyze) {
+        fs.readFile(fileDestination + sgfFileName.substring(0, sgfFileName.length - 4) + '_analyze.txt', 'utf8', async function (err, data_analyze) {
             rep_analyze = data_analyze;
 
             let CorrespNumOfMoves1White = 0;
@@ -136,22 +138,22 @@ async function analyzeFileWithLeela(OStype, sgfFileName) {
             console.log(analyzes.length);
             console.log(listOfMoves.length);
             let countMove = listOfMoves.length > 150 ? 150 : listOfMoves.length; //pour n'analyser que les 150 premiers coups
-            
+
             for (let m = 0; m < countMove; ++m) {
                 //console.log(analyzes);
                 let analyzes2 = analyzes[listOfMoves.length - m].split("\r\n"); // "\n" : sur linux
                 let analyzes3 = analyzes2[2].split("->");
-                let analyze1 ={
-                    "position":analyzes3[0].trim(),
-                    "pourcent":analyzes3[1].substring(12,18).trim(),
+                let analyze1 = {
+                    "position": analyzes3[0].trim(),
+                    "pourcent": analyzes3[1].substring(12, 18).trim(),
                 }
                 // let prop1 = analyzes3[0].trim();
                 // let pourcent = analyzes3[1].substring(12,18);
-                
+
                 analyzes3 = analyzes2[3].split("->");
-                let analyze2 ={
-                    "position":analyzes3[0].trim(),
-                    "pourcent":analyzes3[1].substring(12,18).trim(),
+                let analyze2 = {
+                    "position": analyzes3[0].trim(),
+                    "pourcent": analyzes3[1].substring(12, 18).trim(),
                 }
                 // let prop2 = analyzes3[0].trim();
                 let move = listOfMoves[m];
@@ -192,7 +194,7 @@ async function analyzeFileWithLeela(OStype, sgfFileName) {
                         pasDeCorresp = false;
                     }
                 }
-                if(pasDeCorresp){
+                if (pasDeCorresp) {
                     if (move.colorShort == "W") {
                         ++UnexpectedMovesWhite;
                     } else if (move.colorShort == "B") {
@@ -205,20 +207,20 @@ async function analyzeFileWithLeela(OStype, sgfFileName) {
             let TauxCorrespBalck = (CorrespNumOfMoves1Black + CorrespNumOfMoves2Black) / (CorrespNumOfMoves1Black + CorrespNumOfMoves2Black + NotCorrespNumOfMovesBlack) * 100;
             console.log("Blanc Corresp1: " + CorrespNumOfMoves1White.toString() + " Corresp2: " + CorrespNumOfMoves2White.toString() + " Pas de corresp 1 et 2: " + NotCorrespNumOfMovesWhite.toString() + " Unexpected: " + UnexpectedMovesWhite.toString() + ", taux :" + TauxCorrespWhite);
             console.log("Noir Corresp1: " + CorrespNumOfMoves1Black.toString() + " Corresp2: " + CorrespNumOfMoves2Black.toString() + " Pas de corresp 1 et 2: " + NotCorrespNumOfMovesBlack.toString() + " Unexpected: " + UnexpectedMovesBlack.toString() + ", taux :" + TauxCorrespBalck);
-            
-            let analyzedGame = {
-                "CorrespNumOfMoves1White" : CorrespNumOfMoves1White,
-                "CorrespNumOfMoves2White" : CorrespNumOfMoves2White,
-                "TotalAnalyzedMovesWhite" : CorrespNumOfMoves1White + CorrespNumOfMoves2White + NotCorrespNumOfMovesWhite,
-                "UnexpectedMovesWhite" : UnexpectedMovesWhite,
-    
-                "CorrespNumOfMoves1Black" : CorrespNumOfMoves1Black,
-                "CorrespNumOfMoves2Black" : CorrespNumOfMoves2Black,
-                "TotalAnalyzedMovesBlack" : CorrespNumOfMoves1Black + CorrespNumOfMoves2Black + NotCorrespNumOfMovesBlack,
-                "UnexpectedMovesBlack" : UnexpectedMovesBlack,
 
-                "SGFilePath" : sgfFileName,
-                "PlayerUserId" : userID,
+            let analyzedGame = {
+                "CorrespNumOfMoves1White": CorrespNumOfMoves1White,
+                "CorrespNumOfMoves2White": CorrespNumOfMoves2White,
+                "TotalAnalyzedMovesWhite": CorrespNumOfMoves1White + CorrespNumOfMoves2White + NotCorrespNumOfMovesWhite,
+                "UnexpectedMovesWhite": UnexpectedMovesWhite,
+
+                "CorrespNumOfMoves1Black": CorrespNumOfMoves1Black,
+                "CorrespNumOfMoves2Black": CorrespNumOfMoves2Black,
+                "TotalAnalyzedMovesBlack": CorrespNumOfMoves1Black + CorrespNumOfMoves2Black + NotCorrespNumOfMovesBlack,
+                "UnexpectedMovesBlack": UnexpectedMovesBlack,
+
+                "SgfFileName": sgfFileName,
+                "PlayerUserId": userID,
 
             }
             console.log(analyzedGame);
@@ -231,7 +233,7 @@ async function analyzeFileWithLeela(OStype, sgfFileName) {
 //node -e 'require("./LeelaZero").finalAnalyze("../SGFfiles/liusasori-pinenisan2_2022-03-15_22.37.49.sgf")'
 //node -e 'require("./LeelaZero").testAnalyze()'
 function testAnalyze() {
-    
+
 }
 
 
@@ -245,7 +247,7 @@ function sleep(ms) {
 //module.exports = router;
 //module.exports =  {  analyzeFileWithLeela, finalAnalyze };
 
-module.exports = { 
-    router:router,
-    testAnalyze:testAnalyze,
-  }
+module.exports = {
+    router: router,
+    testAnalyze: testAnalyze,
+}

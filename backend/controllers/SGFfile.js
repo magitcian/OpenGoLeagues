@@ -24,17 +24,25 @@ const upload = multer({ storage: storage })
 
 router.post('/upload', validateToken, upload.single('file'), async function (req, res) {
   //console.log(fileDestination + newFileName);
+  const {  blackLevel, whiteLevel } = req.body;
+  console.log(blackLevel);
 
   let analyzedGame = {
-    "CorrespNumOfMoves1White": 0,
-    "CorrespNumOfMoves2White": 0,
-    "TotalAnalyzedMovesWhite": 0,
-    "UnexpectedMovesWhite": 0,
+    "BlackLevel": blackLevel,
+    "Black1stChoice": 0,
+    "Black2ndChoice": 0,
+    "BlackTotalAnalyzedMoves": 0,
+    "BlackUnexpectedMoves": 0,
+    "BlackMatchRateOfMoves1And2": 0,
+    "IsBlackCheating" : false,
 
-    "CorrespNumOfMoves1Black": 0,
-    "CorrespNumOfMoves2Black": 0,
-    "TotalAnalyzedMovesBlack": 0,
-    "UnexpectedMovesBlack": 0,
+    "WhiteLevel": whiteLevel,
+    "White1stChoice": 0,
+    "White2ndChoice": 0,
+    "WhiteTotalAnalyzedMoves": 0,
+    "WhiteUnexpectedMoves": 0,
+    "WhiteMatchRateOfMoves1And2": 0,
+    "IsWhiteCheating" : false,
 
     "SgfFileName": newFileName,
     "PlayerUserId": req.user.id,

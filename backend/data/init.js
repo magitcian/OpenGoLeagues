@@ -74,7 +74,7 @@ async function addDataInDB() {
     if (l.includes("k")) {
       levelNumber = parseInt("-" + l.replace("k", ""));
     } else {
-      levelNumber = parseInt(l.replace("d", ""));
+      levelNumber = parseInt(l.replace("d", "")) -1;
     }
     let level =
     {

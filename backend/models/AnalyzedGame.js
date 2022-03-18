@@ -8,36 +8,61 @@ module.exports = (sequelize, DataTypes) => {
         //     type: DataTypes.DATE,
         //     allowNull: false,
         // },
-        CorrespNumOfMoves1White: {
+        BlackLevel: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        Black1stChoice: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        CorrespNumOfMoves2White: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        }, 
-        TotalAnalyzedMovesWhite: {
+        Black2ndChoice: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        UnexpectedMovesWhite: {
+        BlackTotalAnalyzedMoves: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        CorrespNumOfMoves1Black: {
+        BlackUnexpectedMoves: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        CorrespNumOfMoves2Black: {
+        BlackMatchRateOfMoves1And2: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        TotalAnalyzedMovesBlack: {
+        IsBlackCheating: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+        },
+
+        WhiteLevel: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        White1stChoice: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        UnexpectedMovesBlack: {
+        White2ndChoice: {
             type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        WhiteTotalAnalyzedMoves: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        WhiteUnexpectedMoves: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        WhiteMatchRateOfMoves1And2: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        IsWhiteCheating: {
+            type: DataTypes.BOOLEAN,
             allowNull: false,
         },
     });

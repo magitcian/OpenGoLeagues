@@ -23,13 +23,14 @@ app.use("/LeelaZero", leelaRouter.router);
 const SGFRouter = require("./controllers/SGFfile");
 app.use("/SGFfile", SGFRouter);
 
+const port = 3001; //Dev : 3001, Prod : 3003
 db.sequelize.sync().then(async() => {
-    //Initialize data in DB
-    const init = require("./data/init");
-    await init.deleteDataInDB();
-    await init.addDataInDB();
+    // //Initialize data in DB
+    // const init = require("./data/init");
+    // await init.deleteDataInDB();
+    // await init.addDataInDB();
 
-    app.listen(3001, async() => {
-        console.log("Server running on port 3001");
+    app.listen(port, async() => { 
+        console.log("Server running on port", port);
     });
 });

@@ -11,8 +11,10 @@ import CheatAnalysis from "./pages/CheatAnalysis";
 import { AuthContext } from "./helpers/AuthContext";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { url } from "./helpers/URLContext";
 
 function App() {
+
     let navigate = useNavigate();
     const [authState, setAuthState] = useState({
         firstName: "",
@@ -26,7 +28,7 @@ function App() {
 
     useEffect(() => {
         axios
-            .get("http://localhost:3001/auth/auth", {
+            .get(url + "auth/auth", {
                 headers: {
                     accessToken: localStorage.getItem("accessToken"),
                 },

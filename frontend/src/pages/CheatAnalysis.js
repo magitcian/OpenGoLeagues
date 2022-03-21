@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../helpers/AuthContext";
 import axios from "axios";
 import Select from 'react-select'
+import { url } from "../helpers/URLContext";
 
 function CheatAnalysis() {
   const { authState } = useContext(AuthContext);
@@ -21,7 +22,7 @@ function CheatAnalysis() {
       navigate("/login");
     } else {
       axios
-        .get("http://localhost:3001/AnalyzedGame/my-analyzed-games", {
+        .get(url + "AnalyzedGame/my-analyzed-games", {
           headers: { accessToken: localStorage.getItem("accessToken") },
         })
         .then((response) => {
@@ -40,7 +41,7 @@ function CheatAnalysis() {
     formData.append('file', sgfFile.data)
     formData.append('blackLevel', blackLevel);
     formData.append('whiteLevel', whiteLevel);
-    fetch('http://localhost:3001/SGFfile/upload', {
+    fetch(url + 'SGFfile/upload', {
       method: 'POST',
       body: formData,
       headers: { accessToken: localStorage.getItem("accessToken") },
@@ -49,7 +50,7 @@ function CheatAnalysis() {
         //console.log(response.analyzedGame)
         setListOfAnalyzedGame([...listOfAnalyzedGame, response.analyzedGame]);
         axios
-          .post("http://localhost:3001/LeelaZero/analyzed",
+          .post(url + "LeelaZero/analyzed",
             {
               fileId: response.analyzedGame.id,
             },

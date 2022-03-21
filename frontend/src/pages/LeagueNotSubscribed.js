@@ -3,6 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../helpers/AuthContext";
+import { url } from "../helpers/URLContext";
 
 function Home() {
   const [listOfLeaguesNotSub, setListOfLeaguesNotSub] = useState([]);
@@ -15,7 +16,7 @@ function Home() {
       navigate("/login");
     } else {
       axios
-        .get("http://localhost:3001/subscribe/not-subscribed-list", {
+        .get(url + "subscribe/not-subscribed-list", {
           headers: { accessToken: localStorage.getItem("accessToken") },
         })
         .then((response) => {

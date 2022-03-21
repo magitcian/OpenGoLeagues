@@ -2,8 +2,10 @@ import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
+import { url } from "../helpers/URLContext";
 
 function Registration() {
+  //const { url } = useContext(url);
   const initialValues = {
     firstName: "",
     lastName: "",
@@ -19,7 +21,7 @@ function Registration() {
   });
 
   const onSubmit = (data) => {
-    axios.post("http://localhost:3001/auth", data).then(() => {
+    axios.post(url + "auth", data).then(() => {
       console.log(data);
     });
   };

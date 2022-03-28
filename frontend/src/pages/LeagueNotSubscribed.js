@@ -7,8 +7,9 @@ import { url } from "../helpers/URLContext";
 
 function Home() {
   const [listOfLeaguesNotSub, setListOfLeaguesNotSub] = useState([]);
-  //const [listOfManagers, setListOfManagers] = useState([]);
+  const [listOfSubscribesStatus, setListOfSubscribesStatus] = useState([]);
   const { authState } = useContext(AuthContext);
+  const status = ["register", "waiting for validation", "refused"];
   let navigate = useNavigate();
 
   useEffect(() => {
@@ -21,13 +22,33 @@ function Home() {
         })
         .then((response) => {
           console.log(response.data.listOfLeaguesNotSub);
-          //console.log(response.data.listOfManagers);
           setListOfLeaguesNotSub(response.data.listOfLeaguesNotSub);
-          //setListOfManagers(response.data.listOfManagers);
-
+          setListOfSubscribesStatus(response.data.listOfSubscribesStatus);
         });
     }
   }, []);
+
+  const register = (leagueId) => {
+    //TODO : include ne fonctionne pas!
+    if (!listOfSubscribesStatus.includes(s => s.LeagueId == leagueId)){
+      axios.post(
+        url + "Subscribe/register",
+        { LeagueId: leagueId },
+        { headers: { accessToken: localStorage.getItem("accessToken") } }
+      )
+      .then((response) => {
+        console.log(response.data);
+        setListOfLeaguesNotSub(
+          listOfLeaguesNotSub.filter((l) => {
+            return l.id != leagueId;
+          })
+        );
+      });
+    }else{
+      alert("Registration not validate");
+    }
+
+  }
 
 
   return (
@@ -48,6 +69,16 @@ function Home() {
             <div className="footer">
               <div className="managerName">
                 <Link to={`/profile/${value.Manager.UserId}`}> {value.Manager.Player.User.firstName} {value.Manager.Player.User.lastName} </Link>
+              </div>
+              <div className="Register"
+                onClick={() => {
+                  console.log(value.id);
+                  register(value.id);
+                }}>
+                  {/* TODO : include ne fonctionne pas! */}
+                  {/* { listOfSubscribesStatus.includes(s => s.LeagueId == value.id) ? (
+                  "Register" ) : ("Registration not validate") } */}
+                  Register
               </div>
             </div>
           </div>

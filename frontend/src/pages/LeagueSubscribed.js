@@ -29,6 +29,22 @@ function Home() {
     }
   }, []);
 
+  const unregister = (leagueId) => {
+    axios
+      .delete(
+        url + `Subscribe/unregister/${leagueId}`,
+        { headers: { accessToken: localStorage.getItem("accessToken") } },
+      )
+      .then((response) => {
+        console.log(response.data);
+        setListOfSubscribes(
+          listOfSubscribes.filter((sub) => {
+            return sub.LeagueId != leagueId;
+          })
+        );
+      });
+  }
+
 
   return (
     <div>
@@ -52,6 +68,13 @@ function Home() {
             <div className="footer">
               <div className="managerName">
                 <Link to={`/profile/${value.League.Manager.UserId}`}> {value.League.Manager.Player.User.firstName} {value.League.Manager.Player.User.lastName} </Link>
+
+              </div>
+              <div className="Register"
+                onClick={() => {
+                  unregister(value.LeagueId);
+                }}>
+                Unregister
               </div>
             </div>
           </div>

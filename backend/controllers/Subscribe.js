@@ -10,7 +10,7 @@ router.get("/subscribed-list", validateToken, async (req, res) => {
     //const listOfManagers = await Manager.findAll({include: [{model: Player, include: [{model: User, attributes: { exclude: ["password"]}}]}] });
     //const listOfUsers = await User.findAll();
     const listOfSubscribes = await Subscribe.findAll({
-        where: { PlayerUserId: req.user.id },
+        where: { PlayerUserId: req.user.id, Status: 1 },
         include: [{
             model: League,
             include: [{
@@ -32,7 +32,8 @@ router.get("/not-subscribed-list", validateToken, async (req, res) => {
 
     const listOfSub = await Subscribe.findAll({
         where: {
-            PlayerUserId: req.user.id
+            PlayerUserId: req.user.id,
+            Status: 1
         }
     });
 
@@ -54,11 +55,59 @@ router.get("/not-subscribed-list", validateToken, async (req, res) => {
                     attributes: { exclude: ["password"] }
                 }]
             }]
-        }]
+        },
+        // {
+        //     model: Subscribe,
+        //     where: {
+        //         PlayerUserId: req.user.id,
+        //     },
+        // },
+        ]
     });
-    res.json({ listOfLeaguesNotSub: listOfLeaguesNotSub });
+
+    const listOfSubscribesStatus = await Subscribe.findAll({
+        where: { PlayerUserId: req.user.id },
+    });
+
+    res.json({ listOfLeaguesNotSub: listOfLeaguesNotSub, listOfSubscribesStatus : listOfSubscribesStatus });
 });
 
+router.post("/register", validateToken, async (req, res) => {
+    const { LeagueId } = req.body;
+    const sub = {
+        LeagueId: LeagueId,
+        PlayerUserId: req.user.id,
+        Status : 1,
+    }
+    await Subscribe.create(sub);
+    res.json(sub);
+});
 
+router.delete("/unregister/:leagueId", validateToken, async (req, res) => {
+    const LeagueId = req.params.leagueId;
+    console.log(LeagueId);
+    await Subscribe.destroy({
+        where: {
+            LeagueId: LeagueId,
+            PlayerUserId: req.user.id
+        },
+    });
+    res.json("ok");
+});
+
+router.get("/player-list/:leagueId", validateToken, async (req, res) => {
+    const LeagueId = req.params.leagueId;
+    const listOfPlayers = await Subscribe.findAll({
+        where: { LeagueId: LeagueId },
+        include: [{
+            model: Player,
+            include: [{
+                model: User,
+                attributes: { exclude: ["password"] }
+            }]
+        }]
+    });
+    res.json({ listOfPlayers: listOfPlayers });
+});
 
 module.exports = router;

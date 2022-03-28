@@ -209,6 +209,7 @@ async function addDataInDB() {
     {
       "LeagueId": league1.id,
       "PlayerUserId" : subscribesLeague1[i].id,
+      "Status" : 1,
     }
     await Subscribe.create(subscribe);
   }
@@ -219,6 +220,7 @@ async function addDataInDB() {
     {
       "LeagueId": league2.id,
       "PlayerUserId" : subscribesLeague2[i].id,
+      "Status" : 2,
     }
     await Subscribe.create(subscribe);
   }

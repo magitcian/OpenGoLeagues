@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { Subscribe, League } = require("../models");
-
+const { League } = require("../models");
+const { validateToken } = require("../middlewares/AuthMiddleware");
 
 
 module.exports = router;

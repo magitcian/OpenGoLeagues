@@ -4,6 +4,10 @@ module.exports = (sequelize, DataTypes) => {
         //     type: DataTypes.INTEGER,
         //     foreignKey: true
         // },
+        Status: {
+            type: DataTypes.INTEGER,
+            foreignKey: true
+        },
     });
 
     Subscribe.associate = (models) => {
@@ -14,3 +18,8 @@ module.exports = (sequelize, DataTypes) => {
 
     return Subscribe;
 };
+
+//Status:
+// 1 => registered
+// 2 => registration to validate
+// 3 => registration refused

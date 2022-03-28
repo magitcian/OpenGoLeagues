@@ -55,7 +55,7 @@ body {
   border-bottom-right-radius: 10px;
 }
 
-.footer .username {
+.footer .managerName {
   flex: 50%;
 }
 .footer .buttons {

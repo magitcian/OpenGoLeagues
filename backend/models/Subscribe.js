@@ -23,3 +23,4 @@ module.exports = (sequelize, DataTypes) => {
 // 1 => registered
 // 2 => registration to validate
 // 3 => registration refused
+// 4 => player quit the league (if he participates at one tournament minimum else subscription is deleted)

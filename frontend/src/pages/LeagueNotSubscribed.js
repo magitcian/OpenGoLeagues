@@ -9,7 +9,6 @@ function Home() {
   const [listOfLeaguesNotSub, setListOfLeaguesNotSub] = useState([]);
   const [listOfSubscribesStatus, setListOfSubscribesStatus] = useState([]);
   const { authState } = useContext(AuthContext);
-  const status = ["register", "waiting for validation", "refused"];
   let navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +21,7 @@ function Home() {
         })
         .then((response) => {
           console.log(response.data.listOfLeaguesNotSub);
+          console.log(response.data.listOfSubscribesStatus);
           setListOfLeaguesNotSub(response.data.listOfLeaguesNotSub);
           setListOfSubscribesStatus(response.data.listOfSubscribesStatus);
         });
@@ -29,25 +29,35 @@ function Home() {
   }, []);
 
   const register = (leagueId) => {
-    //TODO : include ne fonctionne pas!
-    if (!listOfSubscribesStatus.includes(s => s.LeagueId == leagueId)){
+    let sub = listOfSubscribesStatus.find(s => s.LeagueId == leagueId);
+    if(!sub || sub.Status == 4){
+    // if (!listOfSubscribesStatus.map(s => s.LeagueId).includes(leagueId)){
       axios.post(
-        url + "Subscribe/register",
+        url + "Subscribe/player-register",
         { LeagueId: leagueId },
         { headers: { accessToken: localStorage.getItem("accessToken") } }
       )
       .then((response) => {
         console.log(response.data);
-        setListOfLeaguesNotSub(
-          listOfLeaguesNotSub.filter((l) => {
-            return l.id != leagueId;
-          })
-        );
+        setListOfSubscribesStatus([...listOfSubscribesStatus, response.data]);
       });
     }else{
-      alert("Registration not validate");
+      alert(status(leagueId));
     }
 
+  }
+
+  const status = (leagueId) => {
+    let text = "register";
+    let sub = listOfSubscribesStatus.find(s => s.LeagueId == leagueId);
+    if(sub){
+      if(sub.Status == 2){
+        text = "waiting for validation";
+      }else if(sub.Status == 3){
+        text = "refused";
+      }
+    }
+    return text;
   }
 
 
@@ -72,13 +82,9 @@ function Home() {
               </div>
               <div className="Register"
                 onClick={() => {
-                  console.log(value.id);
                   register(value.id);
                 }}>
-                  {/* TODO : include ne fonctionne pas! */}
-                  {/* { listOfSubscribesStatus.includes(s => s.LeagueId == value.id) ? (
-                  "Register" ) : ("Registration not validate") } */}
-                  Register
+                  { status(value.id) }
               </div>
             </div>
           </div>

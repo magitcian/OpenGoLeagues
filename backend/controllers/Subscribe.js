@@ -3,6 +3,7 @@ const router = express.Router();
 const { Subscribe, League, Manager, User, Player } = require("../models");
 const { validateToken } = require("../middlewares/AuthMiddleware");
 const Sequelize = require('sequelize');
+const { where } = require("sequelize");
 
 router.get("/subscribed-list", validateToken, async (req, res) => {
     //const listOfSubscribes = await Subscribe.findAll({ where: { PlayerUserId: req.user.id }, include: [{model: League, include: [User]}] });
@@ -72,14 +73,27 @@ router.get("/not-subscribed-list", validateToken, async (req, res) => {
     res.json({ listOfLeaguesNotSub: listOfLeaguesNotSub, listOfSubscribesStatus : listOfSubscribesStatus });
 });
 
-router.post("/register", validateToken, async (req, res) => {
+router.put("/manager-register", validateToken, async (req, res) => {
     const { LeagueId } = req.body;
-    const sub = {
-        LeagueId: LeagueId,
-        PlayerUserId: req.user.id,
-        Status : 1,
+    let sub = await Subscribe.update({ Status: 1 }, { where: { LeagueId: LeagueId, PlayerUserId: req.user.id } });
+    res.json(sub);
+});
+
+router.post("/player-register", validateToken, async (req, res) => {
+    const { LeagueId } = req.body;
+    let sub = await Subscribe.findOne({where : {LeagueId: LeagueId, PlayerUserId: req.user.id}});
+    if(sub){
+        if(sub.Status == 4){
+            sub = await Subscribe.update({ Status: 2 }, { where: { LeagueId: LeagueId, PlayerUserId: req.user.id } });
+        }
+    }else{
+        sub = {
+            LeagueId: LeagueId,
+            PlayerUserId: req.user.id,
+            Status : 2,
+        }
+        await Subscribe.create(sub);
     }
-    await Subscribe.create(sub);
     res.json(sub);
 });
 

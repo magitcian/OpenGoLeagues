@@ -73,11 +73,11 @@ function App() {
                         ) : (
                             <>
                                 <Link to="/"> Home</Link>
-                                {authState.isManager ? (
+                                {authState.isManager && (
                                     <>
                                         <Link to="/LeaguesIOwn"> Your own leagues</Link>
                                     </>
-                                ) : ("")}
+                                ) }
                                 <Link to="/LeagueSubscribed"> Your leagues</Link>
                                 <Link to="/LeagueNotSubscribed"> Other leagues</Link>
                                 <Link to="/CheatAnalysis"> Cheat analysis</Link>
@@ -101,12 +101,12 @@ function App() {
                             <Route path="/LeagueSubscribed" element={<LeagueSubscribed />} />
                             <Route path="/LeagueNotSubscribed" element={<LeagueNotSubscribed />} />
                             <Route path="/CheatAnalysis" element={<CheatAnalysis />} />
-                            {authState.isManager ? (
+                            {authState.isManager && (
                                 <>
                                     <Route path="/LeaguesIOwn" element={<LeaguesIOwn />} />
                                     <Route path="/ManageLeague/:leagueId" element={<ManageLeague />} />
                                 </>
-                            ) : ("")}
+                            )}
                         </>
                     )}
 

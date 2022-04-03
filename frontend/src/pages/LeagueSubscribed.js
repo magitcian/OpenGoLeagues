@@ -48,9 +48,9 @@ function Home() {
 
   return (
     <div>
-      <h1>Leagues where you are subscribed</h1>
+      <h1>Leagues where you are registered</h1>
       {listOfSubscribes.length == 0
-        ? <p>You are not subscribed to any leagues!</p>
+        ? <p>You are not registered to any leagues!</p>
         : ""
       }
       {listOfSubscribes.map((value, key) => {

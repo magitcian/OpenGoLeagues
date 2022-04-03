@@ -297,3 +297,9 @@ th, td{
 td.toLeft{
 	text-align:left;
 }
+
+.player p, .player div{
+	display: inline-block;
+	margin: 15px;
+	position : relative ;
+}

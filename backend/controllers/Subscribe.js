@@ -74,8 +74,14 @@ router.get("/not-subscribed-list", validateToken, async (req, res) => {
 });
 
 router.put("/manager-register", validateToken, async (req, res) => {
-    const { LeagueId } = req.body;
-    let sub = await Subscribe.update({ Status: 1 }, { where: { LeagueId: LeagueId, PlayerUserId: req.user.id } });
+    const { LeagueId, UserId } = req.body;
+    let sub = await Subscribe.update({ Status: 1 }, { where: { LeagueId: LeagueId, PlayerUserId: UserId } });
+    res.json(sub);
+});
+
+router.put("/manager-refused", validateToken, async (req, res) => {
+    const { LeagueId, UserId } = req.body;
+    let sub = await Subscribe.update({ Status: 3 }, { where: { LeagueId: LeagueId, PlayerUserId: UserId } });
     res.json(sub);
 });
 

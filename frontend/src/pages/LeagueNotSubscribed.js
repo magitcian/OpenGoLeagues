@@ -63,7 +63,7 @@ function Home() {
 
   return (
     <div>
-      <h1>Leagues where you are not subscribed</h1>
+      <h1>Leagues where you are not registered</h1>
       {listOfLeaguesNotSub.map((value, key) => {
         return (
           <div key={key} className="league">

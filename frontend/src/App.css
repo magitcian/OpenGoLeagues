@@ -77,16 +77,16 @@ body {
   margin-left: 10px;
 }
 
-/* CREATE POST PAGE CSS */
+/* CheatingAnalysis PAGE CSS */
 
-.createPostPage {
+/* .createPage {
   font-family: Arial, Helvetica, sans-serif;
   width: 100vw;
   height: 70vh;
   display: flex;
   justify-content: center;
   align-items: center;
-}
+} */
 .formContainer {
   display: flex;
   flex-direction: column;
@@ -98,7 +98,11 @@ body {
   border-radius: 5px;
 }
 
-.formContainer .inputCreatePost {
+.formContainer label {
+  margin: 10px;
+}
+
+/* .formContainer .inputCreatePost {
   height: 40px;
   margin-top: 10px;
   margin-bottom: 10px;
@@ -106,7 +110,7 @@ body {
   border-radius: 5px;
   padding-left: 10px;
   font-size: 20px;
-}
+} */
 
 .formContainer button {
   margin-top: 15px;
@@ -280,26 +284,100 @@ button {
   border: 2px solid dodgerblue;
 }
 
-table
-{
-    border-collapse: collapse; /* Les bordures du tableau seront collées (plus joli) */
-}
-td, th
-{
-    border: 1px solid black;
-}
-th, td{
-	text-align:center;
-}
-.inv{
-	border: none;
-}
-td.toLeft{
-	text-align:left;
-}
-
 .player p, .player div{
 	display: inline-block;
 	margin: 15px;
 	position : relative ;
+}
+
+table
+{
+	border-collapse:separate;
+	border-spacing:0px;
+	/* Remplace border-collapse:collapse */
+	border-radius: 5px;
+	border:5px solid dodgerblue;
+}
+
+/* caption
+{
+	font-size: 20px;
+	margin-bottom: 20px;
+	font-weight:bold;
+} */
+
+thead tr
+{
+	background-color:dodgerblue;
+  color: white;
+  vertical-align: middle;
+
+}
+
+td, th
+{
+	padding:5px;
+	vertical-align: middle;
+  text-align: center;
+}
+
+td .toLeft{
+	text-align:left;
+  border-bottom: 1px solid black;
+}
+
+th
+{
+	font-weight:normal;
+}
+
+td
+{
+	border-right: 1px solid black;
+	border-left: 1px solid black;
+  border-bottom: 1px solid black; 
+}
+
+tbody.res
+{
+	font-weight:bold;
+  border-bottom: 1px solid black; 
+}
+
+tbody tr:nth-child(odd)
+{
+  
+	background-color: rgb(162,230,244);
+
+}
+
+tbody tr:nth-child(even)
+{
+	background-color: white;
+  border-bottom: 1px solid black; 
+}
+
+.no
+{
+	color:rgb(0,128,64);
+}
+
+.yes
+{
+	color:#ff0000;
+}
+
+span.downloadFile{
+  cursor: pointer;
+  color:black;
+}
+
+Form button{
+  margin-left: auto;
+  margin-right: auto;
+}
+
+div.deleteButtons{
+  cursor: pointer;
+  color:black;
 }

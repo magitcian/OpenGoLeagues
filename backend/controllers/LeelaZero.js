@@ -64,7 +64,7 @@ async function analyzeFileWithLeela(OStype, sgfFileId, sgfFileName, blackLevel, 
     let i = 1;
     bat.stdin.write(i.toString() + " loadsgf " + fileDestination + sgfFileName + "\n");
     if (OStype == "w") {
-        bat.stdin.write(i.toString() + " lz-setoption name visits value 100\n");
+        bat.stdin.write(i.toString() + " lz-setoption name visits value 500\n");
     }
     await sleep(2000);
     while (!fini) {
@@ -253,12 +253,13 @@ function finalAnalyze(sgfFileId, sgfFileName, blackLevel, whiteLevel) {
 
                 "SgfFileName": sgfFileName,
                 "PlayerUserId": 2,
+                "Status":1,
 
             }
             console.log(analyzedGame);
             //await AnalyzedGame.create(analyzedGame);
             console.log(sgfFileId);
-            await AnalyzedGame.update({ Black1stChoice: black1stChoice, Black2ndChoice: black2ndChoice, BlackTotalAnalyzedMoves: blackTotalAnalyzedMoves, BlackUnexpectedMoves : blackUnexpectedMoves, BlackMatchRateOfMoves1And2: blackMatchRateOfMoves1And2, IsBlackCheating : isBlackCheating,
+            await AnalyzedGame.update({ Status:1, Black1stChoice: black1stChoice, Black2ndChoice: black2ndChoice, BlackTotalAnalyzedMoves: blackTotalAnalyzedMoves, BlackUnexpectedMoves : blackUnexpectedMoves, BlackMatchRateOfMoves1And2: blackMatchRateOfMoves1And2, IsBlackCheating : isBlackCheating,
                 White1stChoice: white1stChoice, White2ndChoice: white2ndChoice, WhiteTotalAnalyzedMoves: whiteTotalAnalyzedMoves, WhiteUnexpectedMoves : whiteUnexpectedMoves, WhiteMatchRateOfMoves1And2: whiteMatchRateOfMoves1And2, IsWhiteCheating : isWhiteCheating}
             , { where: { id: sgfFileId } });
 

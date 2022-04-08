@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
         //     type: DataTypes.DATE,
         //     allowNull: false,
         // },
+        Status: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+        },
         BlackLevel: {
             type: DataTypes.STRING,
             allowNull: false,

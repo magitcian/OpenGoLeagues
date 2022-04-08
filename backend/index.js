@@ -29,10 +29,10 @@ app.use("/League", LeagueRouter);
 
 const port = 3001; //Dev : 3001, Prod : 3003
 db.sequelize.sync().then(async() => {
-    //Initialize data in DB
-    const init = require("./data/init");
-    await init.deleteDataInDB();
-    await init.addDataInDB();
+    // //Initialize data in DB
+    // const init = require("./data/init");
+    // await init.deleteDataInDB();
+    // await init.addDataInDB();
 
     app.listen(port, async() => { 
         console.log("Server running on port", port);

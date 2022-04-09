@@ -40,9 +40,7 @@ function CheatAnalysis() {
           headers: { accessToken: localStorage.getItem("accessToken") },
         })
         .then((response) => {
-          console.log(response.data.listOfAnalyzedGame);
           setListOfAnalyzedGame(response.data.listOfAnalyzedGame);
-
         });
     }
   }, []);
@@ -67,7 +65,6 @@ function CheatAnalysis() {
       headers: { accessToken: localStorage.getItem("accessToken") },
     }).then(response => response.json())
       .then(response => {
-        //console.log(response.analyzedGame)
         setListOfAnalyzedGame([response.analyzedGame, ...listOfAnalyzedGame]);
         axios
           .post(url + "LeelaZero/analyzed",
@@ -78,7 +75,6 @@ function CheatAnalysis() {
               headers: { accessToken: localStorage.getItem("accessToken") },
             },
           ).then((response) => {
-            console.log(response.data);
           });
       })
     // if (response){
@@ -103,10 +99,8 @@ function CheatAnalysis() {
   // }
 
   const downloadFile = (fileId, fileName) => {
-    console.log(fileId);
     let formData = new FormData();
     formData.append('fileId', fileId);
-    console.log(formData);
     fetch(url + 'SGFfile/download', {
       method: 'POST',
       body: formData,
@@ -130,7 +124,6 @@ function CheatAnalysis() {
 
 
   const deleteAnalysis = (fileId) => {
-    console.log(fileId);
     axios
       .delete(url + `SGFfile/delete/${fileId}`,
         { headers: { accessToken: localStorage.getItem("accessToken") } },

@@ -20,8 +20,6 @@ function Home() {
           headers: { accessToken: localStorage.getItem("accessToken") },
         })
         .then((response) => {
-          console.log(response.data.listOfLeaguesNotSub);
-          console.log(response.data.listOfSubscribesStatus);
           setListOfLeaguesNotSub(response.data.listOfLeaguesNotSub);
           setListOfSubscribesStatus(response.data.listOfSubscribesStatus);
         });
@@ -38,7 +36,6 @@ function Home() {
         { headers: { accessToken: localStorage.getItem("accessToken") } }
       )
       .then((response) => {
-        console.log(response.data);
         setListOfSubscribesStatus([...listOfSubscribesStatus, response.data]);
       });
     }else{

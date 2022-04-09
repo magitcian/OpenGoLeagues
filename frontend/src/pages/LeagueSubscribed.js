@@ -21,10 +21,7 @@ function Home() {
         })
         .then((response) => {
           console.log(response.data.listOfSubscribes);
-          //console.log(response.data.listOfManagers);
           setListOfSubscribes(response.data.listOfSubscribes);
-          //setListOfManagers(response.data.listOfManagers);
-
         });
     }
   }, []);
@@ -36,7 +33,6 @@ function Home() {
         { headers: { accessToken: localStorage.getItem("accessToken") } },
       )
       .then((response) => {
-        console.log(response.data);
         setListOfSubscribes(
           listOfSubscribes.filter((sub) => {
             return sub.LeagueId != leagueId;

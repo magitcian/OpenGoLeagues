@@ -4,10 +4,6 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        // date: {
-        //     type: DataTypes.DATE,
-        //     allowNull: false,
-        // },
         Status: {
             type: DataTypes.BOOLEAN,
             allowNull: false,

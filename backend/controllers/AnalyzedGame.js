@@ -7,6 +7,10 @@ const { validateToken } = require("../middlewares/AuthMiddleware");
 router.get("/my-analyzed-games", validateToken, async (req, res) => {
     const listOfAnalyzedGame = await AnalyzedGame.findAll({
         where: { PlayerUserId: req.user.id },
+        order: [
+            ['createdAt', 'DESC'],
+            // ['id', 'ASC'],
+        ],
     });
     res.json({ listOfAnalyzedGame: listOfAnalyzedGame });
 });

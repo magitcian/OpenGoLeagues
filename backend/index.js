@@ -10,10 +10,6 @@ const db = require("./models");
 // Routers
 const authRouter = require("./controllers/Authentication");
 app.use("/auth", authRouter);
-const userRouter = require("./controllers/Users");
-app.use("/users", userRouter);
-const leagueRouter = require("./controllers/League");
-app.use("/league", leagueRouter);
 const subRouter = require("./controllers/Subscribe");
 app.use("/subscribe", subRouter);
 const anGamesRouter = require("./controllers/AnalyzedGame");
@@ -24,8 +20,6 @@ const SGFRouter = require("./controllers/SGFfile");
 app.use("/SGFfile", SGFRouter);
 const ManagerRouter = require("./controllers/Manager");
 app.use("/Manager", ManagerRouter);
-const LeagueRouter = require("./controllers/League");
-app.use("/League", LeagueRouter);
 
 const port = 3001; //Dev : 3001, Prod : 3003
 db.sequelize.sync().then(async() => {

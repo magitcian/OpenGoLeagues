@@ -21,11 +21,11 @@ function PlayerList(leagueId) {
 
     const status = (status) => {
         //console.log(status);
-        let text = "register";
+        let text = "Registered";
         if (status === 2) {
-            text = "waiting for validation";
+            text = "Waiting for validation";
         } else if (status === 3) {
-            text = "refused";
+            text = "Refused";
         }
         return text;
     }
@@ -41,7 +41,7 @@ function PlayerList(leagueId) {
                 { headers: { accessToken: localStorage.getItem("accessToken") } },
             )
             .then((response) => {
-                let sub = listOfPlayers.find(s=> s.PlayerUserId == userId && s.LeagueId == leagueId);
+                let sub = listOfPlayers.find(s => s.PlayerUserId == userId && s.LeagueId == leagueId);
                 sub.Status = 1;
                 setListOfPlayers([...listOfPlayers]);
             });
@@ -58,29 +58,46 @@ function PlayerList(leagueId) {
                 { headers: { accessToken: localStorage.getItem("accessToken") } },
             )
             .then((response) => {
-                let sub = listOfPlayers.find(s=> s.PlayerUserId == userId && s.LeagueId == leagueId);
+                let sub = listOfPlayers.find(s => s.PlayerUserId == userId && s.LeagueId == leagueId);
                 sub.Status = 3;
                 setListOfPlayers([...listOfPlayers]);
             });
     }
 
     return (
-        <div className="FirstTab">
-            {listOfPlayers.map((sub, key) => {
-                return (
-                    <div key={key} className="player">
-                        <p>{sub.Player.User.firstName} {sub.Player.User.lastName} - {status(sub.Status)}</p>
-                        <div>
-                            {sub.Status !== 1 && (
-                                <button onClick={() => {register(sub.LeagueId, sub.PlayerUserId);}}>Register</button>
-                            )}
-                            {sub.Status !== 3 && (
-                                <button onClick={() => {refused(sub.LeagueId, sub.PlayerUserId);}}>Refused</button>
-                            )}
-                        </div>
-                    </div>
-                );
-            })}
+        <div >
+            <table className='playerList'>
+                <thead>
+                    <tr>
+                        <th>Firstname</th>
+                        <th>Lastname</th>
+                        <th>Level</th>
+                        <th>Registration status</th>
+                        <th>Change registration status</th>
+                    </tr>
+                </thead>
+                {listOfPlayers.map((sub, key) => {
+                    return (
+                        <tbody key={key}>
+                            <tr>
+                                <td>{sub.Player.User.firstName}</td>
+                                <td>{sub.Player.User.lastName}</td>
+                                <td>{sub.Player.Level.level}</td>
+                                <td className={status(sub.Status)}>{status(sub.Status)}</td>
+                                <td>
+                                    <div>
+                                        {sub.Status !== 1 && (
+                                            <button className='register' onClick={() => { register(sub.LeagueId, sub.PlayerUserId); }}>Register</button>
+                                        )}
+                                        {sub.Status !== 3 && (
+                                            <button className='refused' onClick={() => { refused(sub.LeagueId, sub.PlayerUserId); }}>Refused</button>
+                                        )}
+                                    </div></td>
+                            </tr>
+                        </tbody>
+                    );
+                })}
+            </table>
         </div>
     );
 };

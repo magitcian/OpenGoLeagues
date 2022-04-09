@@ -32,7 +32,7 @@ function ManageLeague() {
             {
                 id: '2',
                 title: 'Tournament list',
-                panelComponent: (porps) => <p> panel 2 </p>,
+                panelComponent: (porps) => <p> Tournament list in development </p>,
                 closable: false,
             },
         ],
@@ -56,9 +56,12 @@ function ManageLeague() {
 
     return (
         <>
-            <button onClick={addTab3}>Add tab 3</button>
+            <div className='App'>
+                {/* Pour plus tard, ajout d'onglets dès qu'on clique sur un tournoi: */}
+                {/* <button onClick={addTab3}>Add tab 3</button> */}
                 <TabList></TabList>
                 <PanelList></PanelList>
+            </div>
         </>
     );
 }

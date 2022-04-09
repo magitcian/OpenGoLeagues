@@ -6,6 +6,10 @@
   flex-direction: column;
 }
 
+h1.leaguesTitle{
+  margin-bottom: 0px;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -18,7 +22,7 @@ body {
   display: flex;
   flex-direction: column;
   margin-top: 50px;
-  border: 1px solid lightgray;
+  border: 1px solid lightgray; 
   font-family: Arial, Helvetica, sans-serif;
 
   box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
@@ -58,18 +62,19 @@ body {
 .footer .managerName {
   flex: 50%;
 }
+
+.footer .Register {
+  /* flex: 5%; */
+  /* border: 2px solid red; */
+  margin-right: 15px;
+}
+
 .footer .buttons {
   flex: 50%;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-}
-
-.likeBttn {
-  color: rgba(250, 250, 250, 0.8);
-}
-.unlikeBttn {
-  color: white;
+  /* border: 2px solid red; */
 }
 
 .buttons label {
@@ -79,14 +84,6 @@ body {
 
 /* CheatingAnalysis PAGE CSS */
 
-/* .createPage {
-  font-family: Arial, Helvetica, sans-serif;
-  width: 100vw;
-  height: 70vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-} */
 .formContainer {
   display: flex;
   flex-direction: column;
@@ -101,16 +98,6 @@ body {
 .formContainer label {
   margin: 10px;
 }
-
-/* .formContainer .inputCreatePost {
-  height: 40px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  border: 2px solid grey;
-  border-radius: 5px;
-  padding-left: 10px;
-  font-size: 20px;
-} */
 
 .formContainer button {
   margin-top: 15px;
@@ -183,77 +170,7 @@ span {
   height: 100%;
 }
 
-.leftSide {
-  flex: 50%;
-  height: calc(100vh - 70px);
-  display: grid;
-  place-items: center;
-}
 
-.rightSide {
-  flex: 50%;
-  height: calc(100vh - 70px);
-  display: grid;
-  place-items: center;
-  display: flex;
-  flex-direction: column;
-}
-
-.rightSide .addCommentContainer {
-  flex: 20%;
-  width: 100%;
-  display: grid;
-  place-items: center;
-  margin-top: 25px;
-}
-
-.addCommentContainer input,
-button {
-  width: 200px;
-  height: 50px;
-  border-radius: 8px;
-  border: none;
-}
-
-.addCommentContainer button {
-  background-color: dodgerblue;
-  color: white;
-}
-
-.addCommentContainer input {
-  border: 2px solid dodgerblue;
-}
-
-.rightSide .listOfComments {
-  flex: 80%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.listOfComments .comment {
-  width: 70%;
-  height: auto;
-  padding: 30px;
-  border: 1px solid lightgray;
-  border-radius: 5px;
-  margin-top: 20px;
-}
-
-#individual {
-  height: 500px;
-  width: 600px;
-}
-
-#individual .title,
-#individual .footer {
-  font-size: 30px;
-}
-
-#individual .body {
-  font-size: 25px;
-}
 
 /* LOGIN */
 
@@ -290,7 +207,7 @@ button {
 	position : relative ;
 }
 
-table
+table.resultCheating
 {
 	border-collapse:separate;
 	border-spacing:0px;
@@ -299,14 +216,7 @@ table
 	border:5px solid dodgerblue;
 }
 
-/* caption
-{
-	font-size: 20px;
-	margin-bottom: 20px;
-	font-weight:bold;
-} */
-
-thead tr
+.resultCheating thead tr
 {
 	background-color:dodgerblue;
   color: white;
@@ -314,60 +224,60 @@ thead tr
 
 }
 
-td, th
+.resultCheating td, th
 {
 	padding:5px;
 	vertical-align: middle;
   text-align: center;
 }
 
-td .toLeft{
+.resultCheating td .toLeft{
 	text-align:left;
   border-bottom: 1px solid black;
 }
 
-th
+.resultCheating th
 {
 	font-weight:normal;
 }
 
-td
+.resultCheating td
 {
 	border-right: 1px solid black;
 	border-left: 1px solid black;
   border-bottom: 1px solid black; 
 }
 
-tbody.res
+.resultCheating tbody.res
 {
 	font-weight:bold;
   border-bottom: 1px solid black; 
 }
 
-tbody tr:nth-child(odd)
+.resultCheating tbody tr:nth-child(odd)
 {
   
 	background-color: rgb(162,230,244);
 
 }
 
-tbody tr:nth-child(even)
+.resultCheating tbody tr:nth-child(even)
 {
 	background-color: white;
   border-bottom: 1px solid black; 
 }
 
-.no
+.resultCheating .no
 {
 	color:rgb(0,128,64);
 }
 
-.yes
+.resultCheating .yes
 {
 	color:#ff0000;
 }
 
-span.downloadFile{
+.resultCheating span.downloadFile{
   cursor: pointer;
   color:black;
 }
@@ -380,4 +290,35 @@ Form button{
 div.deleteButtons{
   cursor: pointer;
   color:black;
+}
+
+table.playerList
+{
+    border-collapse: collapse; /* Les bordures du tableau seront collées (plus joli) */
+}
+
+table.playerList td, th
+{
+    border: 1px solid black;
+    text-align:center;
+}
+
+table.playerList button {
+  cursor: pointer;
+  color: white;
+  max-width: 100px;
+  max-height: 30px;
+  background-color: dodgerblue;
+}
+table.playerList button.register {
+  background-color: lightseagreen;
+}
+table.playerList button.refused {
+  background-color: indianred;
+}
+table.playerList td.Registered {
+  color: green;
+}
+table.playerList td.Refused {
+  color: red;
 }

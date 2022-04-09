@@ -47,8 +47,8 @@ function Home() {
 
 
   return (
-    <div>
-      <h1>Leagues where you are registered</h1>
+    <div className='App'>
+      <h1 className="leaguesTitle">Leagues where you are registered</h1>
       {listOfSubscribes.length == 0
         ? <p>You are not registered to any leagues!</p>
         : ""
@@ -67,8 +67,8 @@ function Home() {
             </div>
             <div className="footer">
               <div className="managerName">
-                <Link to={`/profile/${value.League.Manager.UserId}`}> {value.League.Manager.Player.User.firstName} {value.League.Manager.Player.User.lastName} </Link>
-
+                {/* <Link to={`/profile/${value.League.Manager.UserId}`}> {value.League.Manager.Player.User.firstName} {value.League.Manager.Player.User.lastName} </Link> */}
+                {value.League.Manager.Player.User.firstName} {value.League.Manager.Player.User.lastName}
               </div>
               <div className="Register"
                 onClick={() => {

@@ -62,8 +62,8 @@ function Home() {
 
 
   return (
-    <div>
-      <h1>Leagues where you are not registered</h1>
+    <div className='App'>
+      <h1 className="leaguesTitle">Leagues where you are not registered</h1>
       {listOfLeaguesNotSub.map((value, key) => {
         return (
           <div key={key} className="league">
@@ -78,7 +78,8 @@ function Home() {
             </div>
             <div className="footer">
               <div className="managerName">
-                <Link to={`/profile/${value.Manager.UserId}`}> {value.Manager.Player.User.firstName} {value.Manager.Player.User.lastName} </Link>
+                {/* <Link to={`/profile/${value.Manager.UserId}`}> {value.Manager.Player.User.firstName} {value.Manager.Player.User.lastName} </Link> */}
+                {value.Manager.Player.User.firstName} {value.Manager.Player.User.lastName}
               </div>
               <div className="Register"
                 onClick={() => {

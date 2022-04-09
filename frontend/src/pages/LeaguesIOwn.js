@@ -27,8 +27,8 @@ function Home() {
 
 
   return (
-    <div>
-      <h1>Leagues where you are subscribed</h1>
+    <div className='App'>
+      <h1 className="leaguesTitle">Leagues where you are subscribed</h1>
       {listOfLeagues.length == 0
         ? <p>You don't have any leagues!</p>
         : ""

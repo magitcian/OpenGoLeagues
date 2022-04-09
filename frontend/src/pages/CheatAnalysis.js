@@ -68,7 +68,7 @@ function CheatAnalysis() {
     }).then(response => response.json())
       .then(response => {
         //console.log(response.analyzedGame)
-        setListOfAnalyzedGame([...listOfAnalyzedGame, response.analyzedGame]);
+        setListOfAnalyzedGame([response.analyzedGame, ...listOfAnalyzedGame]);
         axios
           .post(url + "LeelaZero/analyzed",
             {

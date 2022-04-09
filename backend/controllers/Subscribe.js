@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Subscribe, League, Manager, User, Player } = require("../models");
+const { Subscribe, League, Manager, User, Player, Level } = require("../models");
 const { validateToken } = require("../middlewares/AuthMiddleware");
 const Sequelize = require('sequelize');
 const { where } = require("sequelize");
@@ -124,6 +124,8 @@ router.get("/player-list/:leagueId", validateToken, async (req, res) => {
             include: [{
                 model: User,
                 attributes: { exclude: ["password"] }
+            },{
+                model: Level,
             }]
         }]
     });

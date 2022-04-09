@@ -75,12 +75,12 @@ function App() {
                                 <Link to="/"> Home</Link>
                                 {authState.isManager && (
                                     <>
-                                        <Link to="/LeaguesIOwn"> Your own leagues</Link>
+                                        <Link to="/LeaguesIOwn">Leagues you manage</Link>
                                     </>
                                 ) }
-                                <Link to="/LeagueSubscribed"> Your leagues</Link>
-                                <Link to="/LeagueNotSubscribed"> Other leagues</Link>
-                                <Link to="/CheatAnalysis"> Cheat analysis</Link>
+                                <Link to="/LeagueSubscribed">Registered leagues</Link>
+                                <Link to="/LeagueNotSubscribed">Other leagues</Link>
+                                <Link to="/CheatAnalysis">Cheat analysis</Link>
                             </>
                         )}
                     </div>
@@ -92,6 +92,7 @@ function App() {
                 <Routes>
                     {!authState.status ? (
                         <>
+                            <Route path='/' element={<Login />} />
                             <Route path='/Login' element={<Login />} />
                             <Route path='/Registration' element={<Registration />} />
                         </>

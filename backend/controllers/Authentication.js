@@ -14,7 +14,6 @@ router.post("/", async (req, res) => {
       email: email,
       password: hash,
     });
-    console.log(user);
     const playerLevel = await Level.findOne({ where: { levelNumber: level } });
     await Player.create({
       UserId: user.id,

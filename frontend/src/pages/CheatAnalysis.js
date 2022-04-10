@@ -19,8 +19,8 @@ function CheatAnalysis() {
   const { authState } = useContext(AuthContext);
   let navigate = useNavigate();
   const [listOfAnalyzedGame, setListOfAnalyzedGame] = useState([]);
-  let blackLevel = 0;
-  let whiteLevel = 0;
+  let blackLevel = -1000;
+  let whiteLevel = -1000;
   let options = [{ value: -20, label: "20K" }, { value: -15, label: '15k' }, { value: -10, label: '10k' }, { value: -5, label: '5k' },
   { value: -4, label: '4k' }, { value: -3, label: '3k' }, { value: -2, label: '2k' }, { value: -1, label: '1k' }, { value: 0, label: '1d' },
   { value: 1, label: '2d' }, { value: 2, label: '3d' }, { value: 3, label: '4d' }, { value: 4, label: '5d' }, { value: 5, label: '6d' },
@@ -55,33 +55,39 @@ function CheatAnalysis() {
   const [status, setStatus] = useState('')
 
   const uploadFile = (e) => {
+    console.log(blackLevel);
+    if(blackLevel !== -1000 && whiteLevel !== -1000){
     let formData = new FormData()
     formData.append('file', sgfFile.data)
     formData.append('blackLevel', blackLevel);
     formData.append('whiteLevel', whiteLevel);
+    console.log(blackLevel);
     fetch(url + 'SGFfile/upload', {
       method: 'POST',
       body: formData,
       headers: { accessToken: localStorage.getItem("accessToken") },
     }).then(response => response.json())
       .then(response => {
-        setListOfAnalyzedGame([response.analyzedGame, ...listOfAnalyzedGame]);
-        axios
-          .post(url + "LeelaZero/analyzed",
-            {
-              fileId: response.analyzedGame.id,
-            },
-            {
-              headers: { accessToken: localStorage.getItem("accessToken") },
-            },
-          ).then((response) => {
-          });
+        console.log(response);
+        if (response.error === undefined) {
+          setListOfAnalyzedGame([response.analyzedGame, ...listOfAnalyzedGame]);
+          axios
+            .post(url + "LeelaZero/analyzed",
+              {
+                fileId: response.analyzedGame.id,
+              },
+              {
+                headers: { accessToken: localStorage.getItem("accessToken") },
+              },
+            ).then((response) => {
+            });
+        } else {
+          alert(response.error);
+        }
       })
-    // if (response){
-    //   setStatus(response.statusText);
-    //   console.log(response.json());
-    // } 
-
+    }else{
+      alert("Select black and white level again!");
+    }
   }
 
   const handleFileChange = (e) => {
@@ -298,7 +304,7 @@ function CheatAnalysis() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button  onClick={() => { deleteAnalysis(fileIdToDelete) }}>Yes</Button>
+          <Button onClick={() => { deleteAnalysis(fileIdToDelete) }}>Yes</Button>
           <Button onClick={handleClose} autoFocus >No</Button>
         </DialogActions>
       </Dialog>

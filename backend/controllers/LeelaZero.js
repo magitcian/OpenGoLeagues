@@ -10,17 +10,13 @@ router.post('/analyzed', validateToken, async function (req, res) {
     const { fileId } = req.body;
     const sgfFile = await AnalyzedGame.findOne({ where: { id: fileId, PlayerUserId: req.user.id } });
     if (sgfFile) {
-        //console.log(sgfFile);
-        await analyzeFileWithLeela("w", sgfFile.id, sgfFile.SgfFileName, sgfFile.BlackLevel, sgfFile.WhiteLevel);
-
-        //leela.finalAnalyze(fileDestination + newFileName);
+        await createAnalysisFileWithLeela("w", sgfFile);
+        await updateAnalysisInDB(sgfFile);
     }
     res.json({ rep: "in progress!" })
 })
 
-
-async function analyzeFileWithLeela(OStype, sgfFileId, sgfFileName, blackLevel, whiteLevel) {
-    const { spawn } = require('child_process');
+function getLeelazPathAccordingToOS(OStype) {
     let leelazPath = "";
     let networkPath = "";
     if (OStype == "w") {
@@ -30,7 +26,17 @@ async function analyzeFileWithLeela(OStype, sgfFileId, sgfFileName, blackLevel, 
         leelazPath = '../leelaZero/linux/leela-zero/build/leelaz';
         networkPath = '../leelaZero/networks/best-network';
     }
-    const bat = spawn(leelazPath, ['-w', networkPath, '-g', '--lagbuffer', '0']);
+    let leelaz ={
+        "path" : leelazPath,
+        "networkPath" : networkPath,
+    }
+    return leelaz;
+}
+
+async function createAnalysisFileWithLeela(OStype, sgfFile) {
+    const { spawn } = require('child_process');
+    let leelaz = getLeelazPathAccordingToOS(OStype);
+    const bat = spawn(leelaz.path, ['-w', leelaz.networkPath, '-g', '--lagbuffer', '0']);
 
     const fs = require('fs')
     let fini = false;
@@ -42,13 +48,11 @@ async function analyzeFileWithLeela(OStype, sgfFileId, sgfFileName, blackLevel, 
         console.log(data.toString());
         if (rep_move.includes("cannot undo") && !fini) {
             fini = true;
-            fs.writeFile(fileDestination + sgfFileName.substring(0, sgfFileName.length - 4) + '_analyze.txt', rep_analyze, err => {
+            fs.writeFile(fileDestination + sgfFile.SgfFileName.substring(0, sgfFile.SgfFileName.length - 4) + '_analyze.txt', rep_analyze, err => {
                 if (err) {
-                    console.error(err)
-                    return
-                } else {
-                    updateAnalysisInDB(sgfFileId, sgfFileName, blackLevel, whiteLevel);
+                    console.error(err);
                 }
+                return;
             })
             console.log("finish!");
             bat.stdin.write("quit\n");
@@ -62,13 +66,14 @@ async function analyzeFileWithLeela(OStype, sgfFileId, sgfFileName, blackLevel, 
     });
 
     let i = 1;
-    bat.stdin.write(i.toString() + " loadsgf " + fileDestination + sgfFileName + "\n");
+
+    bat.stdin.write(i.toString() + " loadsgf " + fileDestination + sgfFile.SgfFileName + "\n");
     if (OStype == "w") {
         bat.stdin.write(i.toString() + " lz-setoption name visits value 500\n");
     }
+
     await sleep(2000);
     while (!fini) {
-
         ++i;
         //console.log(i);
         bat.stdin.write(i.toString() + " undo \n");
@@ -77,15 +82,23 @@ async function analyzeFileWithLeela(OStype, sgfFileId, sgfFileName, blackLevel, 
         await sleep(1000);
     }
 
-
     bat.on('exit', (code) => {
         console.log(`Child exited with code ${code}`);
     });
 }
 
 
-async function updateAnalysisInDB(sgfFileId, sgfFileName, blackLevel, whiteLevel) {
+async function updateAnalysisInDB(sgfFile) {
+    const sgfFileController = require("./SGFfile");
+    let listOfMoves = await sgfFileController.getMovesFromFile(fileDestination + sgfFile.SgfFileName);
+    let listOfLeelazMoves = await getProposedMovesFromAnalysisFile(fileDestination + sgfFile.SgfFileName.substring(0, sgfFile.SgfFileName.length - 4) + '_analyze.txt');
+    // console.log(1, listOfMoves);
+    // console.log(2, listOfLeelazMoves);
+    let analyzedGame = getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves );
+    await AnalyzedGame.update(analyzedGame, { where: { id: analyzedGame.id } });
+};
 
+function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {
     let black1stChoice = 0;
     let black2ndChoice = 0;
     let blackNot12Choice = 0;
@@ -95,12 +108,6 @@ async function updateAnalysisInDB(sgfFileId, sgfFileName, blackLevel, whiteLevel
     let white2ndChoice = 0;
     let whiteNot12Choice = 0;
     let whiteUnexpectedMoves = 0;
-
-    const sgfFile = require("./SGFfile");
-    let listOfMoves = await sgfFile.getMovesFromFile(fileDestination + sgfFileName);
-    let listOfLeelazMoves = await getProposedMovesFromAnalysisFile(fileDestination + sgfFileName.substring(0, sgfFileName.length - 4) + '_analyze.txt');
-    // console.log(1, listOfMoves);
-    // console.log(2, listOfLeelazMoves);
 
     let countMove = listOfMoves.length > 150 ? 150 : listOfMoves.length; //pour n'analyser que les 150 premiers coups
     for (let i = 0; i < countMove; ++i) {
@@ -147,22 +154,19 @@ async function updateAnalysisInDB(sgfFileId, sgfFileName, blackLevel, whiteLevel
     let blackMatchRateOfMoves1And2 = ((black1stChoice) / (black1stChoice + black2ndChoice + blackNot12Choice) * 100).toFixed(2);
     let blackTotalAnalyzedMoves = black1stChoice + black2ndChoice + blackNot12Choice;
     let isBlackCheating = false;
-    if ((blackMatchRateOfMoves1And2 > 85 && blackLevel < 6) || blackMatchRateOfMoves1And2 > (3.324 * blackLevel + 58.78)) {
+    if ((blackMatchRateOfMoves1And2 > 85 && sgfFile.BlackLevel < 6) || blackMatchRateOfMoves1And2 > (3.324 * sgfFile.BlackLevel + 58.78)) {
         isBlackCheating = true;
     }
 
     let whiteMatchRateOfMoves1And2 = ((white1stChoice) / (white1stChoice + white2ndChoice + whiteNot12Choice) * 100).toFixed(2);
     let whiteTotalAnalyzedMoves = white1stChoice + white2ndChoice + whiteNot12Choice;
     let isWhiteCheating = false;
-    if ((whiteMatchRateOfMoves1And2 > 85 && whiteLevel < 6) || whiteMatchRateOfMoves1And2 > (3.324 * whiteLevel + 58.78)) {
+    if ((whiteMatchRateOfMoves1And2 > 85 && sgfFile.WhiteLevel < 6) || whiteMatchRateOfMoves1And2 > (3.324 * sgfFile.WhiteLevel + 58.78)) {
         isWhiteCheating = true;
     }
 
-    console.log("bl:" + blackLevel);
-    console.log("wl:" + whiteLevel);
-
     let analyzedGame = {
-        "BlackLevel": blackLevel,
+        "BlackLevel": sgfFile.BlackLevel,
         "Black1stChoice": black1stChoice,
         "Black2ndChoice": black2ndChoice,
         "BlackTotalAnalyzedMoves": blackTotalAnalyzedMoves,
@@ -170,7 +174,7 @@ async function updateAnalysisInDB(sgfFileId, sgfFileName, blackLevel, whiteLevel
         "BlackMatchRateOfMoves1And2": blackMatchRateOfMoves1And2,
         "IsBlackCheating": isBlackCheating,
 
-        "WhiteLevel": whiteLevel,
+        "WhiteLevel": sgfFile.WhiteLevel,
         "White1stChoice": white1stChoice,
         "White2ndChoice": white2ndChoice,
         "WhiteTotalAnalyzedMoves": whiteTotalAnalyzedMoves,
@@ -178,21 +182,15 @@ async function updateAnalysisInDB(sgfFileId, sgfFileName, blackLevel, whiteLevel
         "WhiteMatchRateOfMoves1And2": whiteMatchRateOfMoves1And2,
         "IsWhiteCheating": isWhiteCheating,
 
-        "SgfFileName": sgfFileName,
-        "PlayerUserId": 2,
+        "id": sgfFile.id,
+        "SgfFileName": sgfFile.SgfFileName,
+        "PlayerUserId": sgfFile.PlayerUserId,
         "Status": 1,
 
     }
-    console.log(analyzedGame);
-    //await AnalyzedGame.create(analyzedGame);
-    console.log(sgfFileId);
-    await AnalyzedGame.update({
-        Status: 1, Black1stChoice: black1stChoice, Black2ndChoice: black2ndChoice, BlackTotalAnalyzedMoves: blackTotalAnalyzedMoves, BlackUnexpectedMoves: blackUnexpectedMoves, BlackMatchRateOfMoves1And2: blackMatchRateOfMoves1And2, IsBlackCheating: isBlackCheating,
-        White1stChoice: white1stChoice, White2ndChoice: white2ndChoice, WhiteTotalAnalyzedMoves: whiteTotalAnalyzedMoves, WhiteUnexpectedMoves: whiteUnexpectedMoves, WhiteMatchRateOfMoves1And2: whiteMatchRateOfMoves1And2, IsWhiteCheating: isWhiteCheating
-    }
-        , { where: { id: sgfFileId } });
-
-};
+    //console.log(analyzedGame);
+    return analyzedGame;
+}
 
 async function getProposedMovesFromAnalysisFile(analysisFilePath) {
     let arrayOfAnalysisList = new Array();
@@ -201,7 +199,7 @@ async function getProposedMovesFromAnalysisFile(analysisFilePath) {
     let arrayOfAnalysisStr = contentStr.split("NN eval=");
 
     for (let i = arrayOfAnalysisStr.length - 1; i > 0; --i) {
-        let listOfAnalysis = new Array();
+        let listOfProposedMoves = new Array();
         let AnalysisStr = arrayOfAnalysisStr[i].split("\r\n"); // "\n" : sur linux
 
         for (let j = 2; j < AnalysisStr.length; ++j) {
@@ -212,10 +210,10 @@ async function getProposedMovesFromAnalysisFile(analysisFilePath) {
                     "position": analyzeSplit[0].trim(),
                     "pourcent": analyzeSplit[1].substring(12, 18).trim()
                 }
-                listOfAnalysis.push(proposedMove);
+                listOfProposedMoves.push(proposedMove);
             }
         }
-        arrayOfAnalysisList.push(listOfAnalysis);
+        arrayOfAnalysisList.push(listOfProposedMoves);
     }
     return arrayOfAnalysisList;
 }

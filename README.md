@@ -4,7 +4,7 @@
 
 ## Website
 When the server is light on the website is accessible on:
-http://opengoleagues.magitcian.com:3002
+https://opengoleagues.magitcian.com
 
 ## Initialize project
 First terminal:

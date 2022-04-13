@@ -1,7 +1,7 @@
 
 
 //Prod:
-//export const url = 'http://opengoleagues.magitcian.com:3003/';
+//export const url = 'https://opengoleagues.magitcian.com/api/';
 // //Dev
 export const url = 'http://localhost:3001/';
 

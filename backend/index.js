@@ -15,9 +15,9 @@ app.use("/subscribe", subRouter);
 const anGamesRouter = require("./controllers/AnalyzedGame");
 app.use("/AnalyzedGame", anGamesRouter);
 const leelaRouter = require("./controllers/LeelaZero");
-app.use("/LeelaZero", leelaRouter.router);
+app.use("/LeelaZero", leelaRouter);
 const SGFRouter = require("./controllers/SGFfile");
-app.use("/SGFfile", SGFRouter);
+app.use("/SGFfile", SGFRouter.router);
 const ManagerRouter = require("./controllers/Manager");
 app.use("/Manager", ManagerRouter);
 

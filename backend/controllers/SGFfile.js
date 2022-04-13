@@ -81,7 +81,7 @@ router.post('/upload', validateToken, multerUploads, async function (req, res) {
   } else {
     console.log("pas ok!");
     const fs = require('fs');
-    fs.unlinkSync(fileDestination + newFileName);
+    fs.unlinkSync(fileDestination + newFileName); //delete file
     res.json({ error: "Bad file format or black/white level missing!" });
   }
 
@@ -94,8 +94,8 @@ router.post('/download', validateToken, upload.none(), async function (req, res)
   if (sgfFile) {
     const fs = require('fs')
     const pathFile = __dirname.substring(0, __dirname.length - 11) + "SGFfiles\\" + sgfFile.SgfFileName;
-    if (fs.existsSync(pathFile)) {
-      res.append('fileName', sgfFile.SgfFileName);
+    if (fs.existsSync(pathFile)) { 
+      res.append('fileName', sgfFile.SgfFileName); 
       res.status(200).sendFile(pathFile);
     } else {
       res.status(400).send({ error: "File doesn't exists!" });
@@ -125,15 +125,15 @@ router.delete("/delete/:fileId", validateToken, async (req, res) => {
         PlayerUserId: req.user.id
       },
     });
-    if (fs.existsSync(pathFileSGF)) {
+    if (fs.existsSync(pathFileSGF)) { //if file exist then delete files
       fs.unlinkSync(pathFileSGF);
       fs.unlinkSync(pathFileAnalysis);
-      res.status(200).send({ message: "Files deleted" });
+      res.json({ message: "Files deleted" });
     } else {
-      res.status(400).send({ error: "File doesn't exists!" });
+      res.json({ error: "File doesn't exists!" });
     }
   } else {
-    res.status(400).send({ error: "You are not allowed to delete this file!" });
+    res.json({ error: "You are not allowed to delete this file!" });
   }
 });
 
@@ -181,7 +181,7 @@ async function getMovesFromFile(filePath) {
         "posLeela": posLeela1 == "pass" ? posLeela1 : posLeela1 + posLeela2,
         "time": moveStr.substring(8, 10),
       }
-      console.log(moveObj);
+      //console.log(moveObj);
       if ((moveObj.colorShort === "W" || moveObj.colorShort === "B") && moveObj.posLeela1 !== undefined) {
         arrayOfMovesObj.push(moveObj);
       }
@@ -196,4 +196,9 @@ async function loadFileContent(filePath) {
   return new Buffer.from(data);
 }
 
-module.exports = router;
+//module.exports = router;
+
+module.exports = {
+  router: router,
+  getMovesFromFile: getMovesFromFile,
+}

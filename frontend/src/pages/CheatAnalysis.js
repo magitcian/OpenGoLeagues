@@ -56,36 +56,36 @@ function CheatAnalysis() {
 
   const uploadFile = (e) => {
     console.log(blackLevel);
-    if(blackLevel !== -1000 && whiteLevel !== -1000){
-    let formData = new FormData()
-    formData.append('file', sgfFile.data)
-    formData.append('blackLevel', blackLevel);
-    formData.append('whiteLevel', whiteLevel);
-    console.log(blackLevel);
-    fetch(url + 'SGFfile/upload', {
-      method: 'POST',
-      body: formData,
-      headers: { accessToken: localStorage.getItem("accessToken") },
-    }).then(response => response.json())
-      .then(response => {
-        console.log(response);
-        if (response.error === undefined) {
-          setListOfAnalyzedGame([response.analyzedGame, ...listOfAnalyzedGame]);
-          axios
-            .post(url + "LeelaZero/analyzed",
-              {
-                fileId: response.analyzedGame.id,
-              },
-              {
-                headers: { accessToken: localStorage.getItem("accessToken") },
-              },
-            ).then((response) => {
-            });
-        } else {
-          alert(response.error);
-        }
-      })
-    }else{
+    if (blackLevel !== -1000 && whiteLevel !== -1000) {
+      let formData = new FormData()
+      formData.append('file', sgfFile.data)
+      formData.append('blackLevel', blackLevel);
+      formData.append('whiteLevel', whiteLevel);
+      console.log(blackLevel);
+      fetch(url + 'SGFfile/upload', {
+        method: 'POST',
+        body: formData,
+        headers: { accessToken: localStorage.getItem("accessToken") },
+      }).then(response => response.json())
+        .then(response => {
+          console.log(response);
+          if (response.error === undefined) {
+            setListOfAnalyzedGame([response.analyzedGame, ...listOfAnalyzedGame]);
+            axios
+              .post(url + "LeelaZero/analyzed",
+                {
+                  fileId: response.analyzedGame.id,
+                },
+                {
+                  headers: { accessToken: localStorage.getItem("accessToken") },
+                },
+              ).then((response) => {
+              });
+          } else {
+            alert(response.error);
+          }
+        })
+    } else {
       alert("Select black and white level again!");
     }
   }
@@ -141,11 +141,13 @@ function CheatAnalysis() {
           })
         );
         handleClose();
+        // if (response.error === undefined) {
+        // }
       });
   }
 
   const [open, setOpen] = React.useState(false);
-  const [fileIdToDelete, setFileIdToDelete] = React.useState(0);
+  const [fileIdToDelete, setFileIdToDelete] = React.useState(0); 
 
   const handleClickOpen = (fileId) => {
     setFileIdToDelete(fileId);
@@ -155,6 +157,7 @@ function CheatAnalysis() {
   const handleClose = () => {
     setOpen(false);
   };
+  
 
   return (
     <div className='App'>

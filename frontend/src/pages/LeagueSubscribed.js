@@ -29,7 +29,7 @@ function Home() {
   const unregister = (leagueId) => {
     axios
       .delete(
-        url + `Subscribe/unregister/${leagueId}`,
+        url + `subscribe/unregister/${leagueId}`,
         { headers: { accessToken: localStorage.getItem("accessToken") } },
       )
       .then((response) => {

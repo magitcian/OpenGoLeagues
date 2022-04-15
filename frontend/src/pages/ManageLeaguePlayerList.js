@@ -33,7 +33,7 @@ function PlayerList(leagueId) {
     const register = (leagueId, userId) => {
         axios
             .put(
-                url + `Subscribe/manager-register/`,
+                url + `subscribe/manager-register/`,
                 {
                     LeagueId: leagueId,
                     UserId: userId,
@@ -50,7 +50,7 @@ function PlayerList(leagueId) {
     const refused = (leagueId, userId) => {
         axios
             .put(
-                url + `Subscribe/manager-refused`,
+                url + `subscribe/manager-refused`,
                 {
                     LeagueId: leagueId,
                     UserId: userId,

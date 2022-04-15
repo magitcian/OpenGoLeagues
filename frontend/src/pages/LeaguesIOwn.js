@@ -15,7 +15,7 @@ function Home() {
       navigate("/login");
     } else {
       axios
-        .get(url + "Manager/own-leagues-list", {
+        .get(url + "manager/own-leagues-list", {
           headers: { accessToken: localStorage.getItem("accessToken") },
         })
         .then((response) => {

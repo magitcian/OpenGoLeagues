@@ -31,7 +31,7 @@ function Home() {
     if(!sub || sub.Status == 4){
     // if (!listOfSubscribesStatus.map(s => s.LeagueId).includes(leagueId)){
       axios.post(
-        url + "Subscribe/player-register",
+        url + "subscribe/player-register",
         { LeagueId: leagueId },
         { headers: { accessToken: localStorage.getItem("accessToken") } }
       )

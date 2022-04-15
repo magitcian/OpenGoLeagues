@@ -36,10 +36,11 @@ function CheatAnalysis() {
       navigate("/login");
     } else {
       axios
-        .get(url + "AnalyzedGame/my-analyzed-games", {
+        .get(url + "analyzedGame/my-analyzed-games", {
           headers: { accessToken: localStorage.getItem("accessToken") },
         })
         .then((response) => {
+          console.log(response.data);
           setListOfAnalyzedGame(response.data.listOfAnalyzedGame);
         });
     }
@@ -62,7 +63,7 @@ function CheatAnalysis() {
       formData.append('blackLevel', blackLevel);
       formData.append('whiteLevel', whiteLevel);
       console.log(blackLevel);
-      fetch(url + 'SGFfile/upload', {
+      fetch(url + 'sgfFile/upload', {
         method: 'POST',
         body: formData,
         headers: { accessToken: localStorage.getItem("accessToken") },
@@ -72,7 +73,7 @@ function CheatAnalysis() {
           if (response.error === undefined) {
             setListOfAnalyzedGame([response.analyzedGame, ...listOfAnalyzedGame]);
             axios
-              .post(url + "LeelaZero/analyzed",
+              .post(url + "leelaZero/analyzed",
                 {
                   fileId: response.analyzedGame.id,
                 },
@@ -107,7 +108,7 @@ function CheatAnalysis() {
   const downloadFile = (fileId, fileName) => {
     let formData = new FormData();
     formData.append('fileId', fileId);
-    fetch(url + 'SGFfile/download', {
+    fetch(url + 'sgfFile/download', {
       method: 'POST',
       body: formData,
       headers: { accessToken: localStorage.getItem("accessToken") },
@@ -131,7 +132,7 @@ function CheatAnalysis() {
 
   const deleteAnalysis = (fileId) => {
     axios
-      .delete(url + `SGFfile/delete/${fileId}`,
+      .delete(url + `sgfFile/delete/${fileId}`,
         { headers: { accessToken: localStorage.getItem("accessToken") } },
       )
       .then((response) => {

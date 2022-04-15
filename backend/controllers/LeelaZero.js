@@ -8,12 +8,14 @@ let fileDestination = "./SGFfiles/";
 
 router.post('/analyzed', validateToken, async function (req, res) {
     const { fileId } = req.body;
-    const sgfFile = await AnalyzedGame.findOne({ where: { id: fileId, PlayerUserId: req.user.id } });
+    const sgfFile = await AnalyzedGame.findOne({ where: { id: fileId, PlayerUserId: req.user.id, status: 0 } });
     if (sgfFile) {
         await createAnalysisFileWithLeela("w", sgfFile);
-        await updateAnalysisInDB(sgfFile);
+        let analyzedGame = await updateAnalysisInDB(sgfFile);
+        res.json({ AnalyzedGame: analyzedGame });
+    }else{
+        res.json({ error: "There is no game to analyze!" });
     }
-    res.json({ rep: "in progress!" })
 })
 
 function getLeelazPathAccordingToOS(OStype) {
@@ -96,6 +98,7 @@ async function updateAnalysisInDB(sgfFile) {
     // console.log(2, listOfLeelazMoves);
     let analyzedGame = getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves );
     await AnalyzedGame.update(analyzedGame, { where: { id: analyzedGame.id } });
+    return analyzedGame;
 };
 
 function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {

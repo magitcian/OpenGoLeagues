@@ -36,7 +36,8 @@ router.post("/login", async (req, res) => {
 
     const accessToken = sign( //ici qu'on enregistre l'utilisateur dans le token?
       { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, isManager: isUserManager },
-      "importantsecret"
+      //"importantsecret"
+      "AYU3Gigiu33FYFuFkg786uiDY6164hguisdqsf264qsf68RgcjKj75hooLGF99"
     );
     res.json({ token: accessToken, id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, isManager: isUserManager });
   });

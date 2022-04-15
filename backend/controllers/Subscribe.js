@@ -57,12 +57,12 @@ router.get("/not-subscribed-list", validateToken, async (req, res) => {
                 }]
             }]
         },
-        // {
-        //     model: Subscribe,
-        //     where: {
-        //         PlayerUserId: req.user.id,
-        //     },
-        // },
+            // {
+            //     model: Subscribe,
+            //     where: {
+            //         PlayerUserId: req.user.id,
+            //     },
+            // },
         ]
     });
 
@@ -70,33 +70,43 @@ router.get("/not-subscribed-list", validateToken, async (req, res) => {
         where: { PlayerUserId: req.user.id },
     });
 
-    res.json({ listOfLeaguesNotSub: listOfLeaguesNotSub, listOfSubscribesStatus : listOfSubscribesStatus });
+    res.json({ listOfLeaguesNotSub: listOfLeaguesNotSub, listOfSubscribesStatus: listOfSubscribesStatus });
 });
 
 router.put("/manager-register", validateToken, async (req, res) => {
     const { LeagueId, UserId } = req.body;
-    let sub = await Subscribe.update({ Status: 1 }, { where: { LeagueId: LeagueId, PlayerUserId: UserId } });
-    res.json(sub);
+    const league = await League.findOne({ where: { id: LeagueId, ManagerUserId: req.user.id } });
+    if (req.user.isManager && league) {
+        let sub = await Subscribe.update({ Status: 1 }, { where: { LeagueId: LeagueId, PlayerUserId: UserId } });
+        res.json(sub);
+    } else {
+        res.json({ error: "You are not owner of this league!" });
+    }
 });
 
 router.put("/manager-refused", validateToken, async (req, res) => {
     const { LeagueId, UserId } = req.body;
-    let sub = await Subscribe.update({ Status: 3 }, { where: { LeagueId: LeagueId, PlayerUserId: UserId } });
-    res.json(sub);
+    const league = await League.findOne({ where: { id: LeagueId, ManagerUserId: req.user.id } });
+    if (req.user.isManager && league) {
+        let sub = await Subscribe.update({ Status: 3 }, { where: { LeagueId: LeagueId, PlayerUserId: UserId } });
+        res.json(sub);
+    } else {
+        res.json({ error: "You are not owner of this league!" });
+    }
 });
 
 router.post("/player-register", validateToken, async (req, res) => {
     const { LeagueId } = req.body;
-    let sub = await Subscribe.findOne({where : {LeagueId: LeagueId, PlayerUserId: req.user.id}});
-    if(sub){
-        if(sub.Status == 4){
+    let sub = await Subscribe.findOne({ where: { LeagueId: LeagueId, PlayerUserId: req.user.id } });
+    if (sub) {
+        if (sub.Status == 4) {
             sub = await Subscribe.update({ Status: 2 }, { where: { LeagueId: LeagueId, PlayerUserId: req.user.id } });
         }
-    }else{
+    } else {
         sub = {
             LeagueId: LeagueId,
             PlayerUserId: req.user.id,
-            Status : 2,
+            Status: 2,
         }
         await Subscribe.create(sub);
     }
@@ -105,31 +115,36 @@ router.post("/player-register", validateToken, async (req, res) => {
 
 router.delete("/unregister/:leagueId", validateToken, async (req, res) => {
     const LeagueId = req.params.leagueId;
-    console.log(LeagueId);
+    //console.log(LeagueId);
     await Subscribe.destroy({
         where: {
             LeagueId: LeagueId,
             PlayerUserId: req.user.id
         },
     });
-    res.json("ok");
+    res.json("delete ok");
 });
 
 router.get("/player-list/:leagueId", validateToken, async (req, res) => {
     const LeagueId = req.params.leagueId;
-    const listOfPlayers = await Subscribe.findAll({
-        where: { LeagueId: LeagueId },
-        include: [{
-            model: Player,
+    const league = await League.findOne({ where: { id: LeagueId, ManagerUserId: req.user.id } });
+    if (req.user.isManager && league) {
+        const listOfPlayers = await Subscribe.findAll({
+            where: { LeagueId: LeagueId },
             include: [{
-                model: User,
-                attributes: { exclude: ["password"] }
-            },{
-                model: Level,
+                model: Player,
+                include: [{
+                    model: User,
+                    attributes: { exclude: ["password"] }
+                }, {
+                    model: Level,
+                }]
             }]
-        }]
-    });
-    res.json({ listOfPlayers: listOfPlayers });
+        });
+        res.json({ listOfPlayers: listOfPlayers });
+    } else {
+        res.json({ error: "You are not owner of this league!" });
+    }
 });
 
 module.exports = router;

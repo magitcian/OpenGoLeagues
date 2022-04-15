@@ -46,13 +46,11 @@ const multerUploads = multer({
 
 router.post('/upload', validateToken, multerUploads, async function (req, res) {
   const { blackLevel, whiteLevel } = req.body;
-  console.log("blackLevel", blackLevel);
-
   const blackPlayerLevel = await Level.findOne({ where: { levelNumber: blackLevel } });
   const whitePlayerLevel = await Level.findOne({ where: { levelNumber: whiteLevel } });
   let isFileFormatCorrect = await correctFileFormat(fileDestination + newFileName);
   if (blackPlayerLevel && whitePlayerLevel && isFileFormatCorrect) {
-    console.log("ok!");
+
     let analyzedGame = {
       "BlackLevel": blackLevel,
       "Black1stChoice": 0,
@@ -75,16 +73,13 @@ router.post('/upload', validateToken, multerUploads, async function (req, res) {
       "createdAt": fileDate,
       "Status": 0,
     }
-
     analyzedGame = await AnalyzedGame.create(analyzedGame);
     res.json({ analyzedGame: analyzedGame });
   } else {
-    console.log("pas ok!");
     const fs = require('fs');
     fs.unlinkSync(fileDestination + newFileName); //delete file
     res.json({ error: "Bad file format or black/white level missing!" });
   }
-
 })
 
 const upload = multer({ storage: storage })

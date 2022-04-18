@@ -13,7 +13,7 @@ router.post('/analyzed', validateToken, async function (req, res) {
         await createAnalysisFileWithLeela("w", sgfFile);
         let analyzedGame = await updateAnalysisInDB(sgfFile);
         res.json({ AnalyzedGame: analyzedGame });
-    }else{
+    } else {
         res.json({ error: "There is no game to analyze!" });
     }
 })
@@ -28,9 +28,9 @@ function getLeelazPathAccordingToOS(OStype) {
         leelazPath = '../leelaZero/linux/leela-zero/build/leelaz';
         networkPath = '../leelaZero/networks/best-network';
     }
-    let leelaz ={
-        "path" : leelazPath,
-        "networkPath" : networkPath,
+    let leelaz = {
+        "path": leelazPath,
+        "networkPath": networkPath,
     }
     return leelaz;
 }
@@ -71,17 +71,17 @@ async function createAnalysisFileWithLeela(OStype, sgfFile) {
 
     bat.stdin.write(i.toString() + " loadsgf " + fileDestination + sgfFile.SgfFileName + "\n");
     if (OStype == "w") {
-        bat.stdin.write(i.toString() + " lz-setoption name visits value 500\n");
+        bat.stdin.write(i.toString() + " lz-setoption name visits value " + sgfFile.VisitsAverage + "\n");
     }
 
-    await sleep(2000);
+    await sleep(3000);
     while (!fini) {
         ++i;
         //console.log(i);
         bat.stdin.write(i.toString() + " undo \n");
-        await sleep(500);
-        bat.stdin.write(i.toString() + " lz-analyze 0 \n");
         await sleep(1000);
+        bat.stdin.write(i.toString() + " lz-analyze 0 \n");
+        await sleep(5000);
     }
 
     bat.on('exit', (code) => {
@@ -96,7 +96,7 @@ async function updateAnalysisInDB(sgfFile) {
     let listOfLeelazMoves = await getProposedMovesFromAnalysisFile(fileDestination + sgfFile.SgfFileName.substring(0, sgfFile.SgfFileName.length - 4) + '_analyze.txt');
     // console.log(1, listOfMoves);
     // console.log(2, listOfLeelazMoves);
-    let analyzedGame = getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves );
+    let analyzedGame = getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves);
     await AnalyzedGame.update(analyzedGame, { where: { id: analyzedGame.id } });
     return analyzedGame;
 };
@@ -112,11 +112,13 @@ function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {
     let whiteNot12Choice = 0;
     let whiteUnexpectedMoves = 0;
 
+    let visitsAverage = 0;
     let countMove = listOfMoves.length > 150 ? 150 : listOfMoves.length; //pour n'analyser que les 150 premiers coups
     for (let i = 0; i < countMove; ++i) {
 
         let move = listOfMoves[i];
         let LeelazMoves = listOfLeelazMoves[i];
+        visitsAverage += parseInt(LeelazMoves[0].visits);
 
         if (move.colorShort == "W") {
             if (move.posLeela == LeelazMoves[0].position) {
@@ -154,6 +156,7 @@ function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {
         }
     }
 
+    visitsAverage = visitsAverage/countMove;
     let blackMatchRateOfMoves1And2 = ((black1stChoice) / (black1stChoice + black2ndChoice + blackNot12Choice) * 100).toFixed(2);
     let blackTotalAnalyzedMoves = black1stChoice + black2ndChoice + blackNot12Choice;
     let isBlackCheating = false;
@@ -189,7 +192,7 @@ function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {
         "SgfFileName": sgfFile.SgfFileName,
         "PlayerUserId": sgfFile.PlayerUserId,
         "Status": 1,
-
+        "VisitsAverage": visitsAverage,
     }
     //console.log(analyzedGame);
     return analyzedGame;
@@ -205,19 +208,26 @@ async function getProposedMovesFromAnalysisFile(analysisFilePath) {
         let listOfProposedMoves = new Array();
         let AnalysisStr = arrayOfAnalysisStr[i].split("\r\n"); // "\n" : sur linux
 
+        let visits = 0;
+        if (AnalysisStr[AnalysisStr.length - 3].includes("visits")) {
+            visits = AnalysisStr[AnalysisStr.length - 3].split("visits")[0].trim();
+        }
+
         for (let j = 2; j < AnalysisStr.length; ++j) {
             let analyzeSplit = AnalysisStr[j].split("->");
 
             if (analyzeSplit.length > 1) {
                 let proposedMove = {
                     "position": analyzeSplit[0].trim(),
-                    "pourcent": analyzeSplit[1].substring(12, 18).trim()
+                    "pourcent": analyzeSplit[1].substring(12, 18).trim(),
+                    "visits": visits,
                 }
                 listOfProposedMoves.push(proposedMove);
             }
         }
         arrayOfAnalysisList.push(listOfProposedMoves);
     }
+    //console.log(arrayOfAnalysisList);
     return arrayOfAnalysisList;
 }
 

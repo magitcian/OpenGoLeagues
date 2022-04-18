@@ -114,7 +114,7 @@ body {
   background-color: dodgerblue;
 }
 
-span {
+span.error {
   color: red;
 }
 

@@ -21,14 +21,17 @@ function CheatAnalysis() {
   const [listOfAnalyzedGame, setListOfAnalyzedGame] = useState([]);
   let blackLevel = -1000;
   let whiteLevel = -1000;
-  let options = [{ value: -20, label: "20K" }, { value: -15, label: '15k' }, { value: -10, label: '10k' }, { value: -5, label: '5k' },
+  let visits = -1000;
+  let levelOptions = [{ value: -20, label: "20K" }, { value: -15, label: '15k' }, { value: -10, label: '10k' }, { value: -5, label: '5k' },
   { value: -4, label: '4k' }, { value: -3, label: '3k' }, { value: -2, label: '2k' }, { value: -1, label: '1k' }, { value: 0, label: '1d' },
   { value: 1, label: '2d' }, { value: 2, label: '3d' }, { value: 3, label: '4d' }, { value: 4, label: '5d' }, { value: 5, label: '6d' },
   { value: 6, label: '7d' }, { value: 7, label: '8d' }, { value: 8, label: '9d' }]
+  let visitsOptions = [{ value: 100, label: "100" }, { value: 500, label: '500' }, { value: 1000, label: '1000' }]
   const initialValues = {
     file: "",
     blackLevel: "",
     whiteLevel: "",
+    visits:"",
   };
 
   useEffect(() => {
@@ -50,6 +53,7 @@ function CheatAnalysis() {
     file: Yup.string().required("You must input a file!"),
     blackLevel: Yup.string().required("You must select a black level!"),
     whiteLevel: Yup.string().required("You must select a white level!"),
+    visits:Yup.string().required("You must select a number of visits!"),
   });
 
   const [sgfFile, setSgfFile] = useState({ preview: '', data: '' })
@@ -62,7 +66,8 @@ function CheatAnalysis() {
       formData.append('file', sgfFile.data)
       formData.append('blackLevel', blackLevel);
       formData.append('whiteLevel', whiteLevel);
-      console.log(blackLevel);
+      formData.append('visits', visits);
+      //console.log(blackLevel);
       fetch(url + 'sgfFile/upload', {
         method: 'POST',
         body: formData,
@@ -183,16 +188,20 @@ function CheatAnalysis() {
           }) => (
             <Form className="formContainer">
               <label>Upload a file: </label>
-              <ErrorMessage name="file" component="span" />
+              <ErrorMessage name="file" component="span" className='error'/>
               <input type='file' name='file' onChange={(e) => { handleFileChange(e); setFieldValue("file", "new file") }}></input>
 
               <label>Select black level: </label>
-              <ErrorMessage name="blackLevel" component="span" />
-              <Select name="blackLevel" options={options} onChange={(e) => { blackLevel = e.value; setFieldValue("blackLevel", e.value) }} />
+              <ErrorMessage name="blackLevel" component="span" className='error'/>
+              <Select name="blackLevel" options={levelOptions} onChange={(e) => { blackLevel = e.value; setFieldValue("blackLevel", e.value) }} />
 
               <label>Select white level: </label>
-              <ErrorMessage name="whiteLevel" component="span" />
-              <Select name="whiteLevel" options={options} onChange={(e) => { whiteLevel = e.value; setFieldValue("whiteLevel", e.value) }} />
+              <ErrorMessage name="whiteLevel" component="span" className='error'/>
+              <Select name="whiteLevel" options={levelOptions} onChange={(e) => { whiteLevel = e.value; setFieldValue("whiteLevel", e.value) }} />
+
+              <label>Select number of visits: </label>
+              <ErrorMessage name="visits" component="span" className='error'/>
+              <Select name="visits" options={visitsOptions} onChange={(e) => { visits = e.value; setFieldValue("visits", e.value) }} />
 
               <button type="submit">Send file to analyse</button>
             </Form>
@@ -208,6 +217,7 @@ function CheatAnalysis() {
           <tr>
             <th></th>
             <th>FileName</th>
+            <th>Visits average</th>
             <th>Color</th>
             <th>Level</th>
             <th>1st move correspondances</th>
@@ -238,12 +248,15 @@ function CheatAnalysis() {
                 <td rowSpan="2" className="toLeft">
                   <span className="downloadFile" onClick={() => { downloadFile(value.id, value.SgfFileName) }}>{value.SgfFileName}</span>
                 </td>
+                <td rowSpan="2" >
+                  <span>{value.VisitsAverage}</span>
+                </td>
 
                 <td >
                   Black
                 </td>
                 <td >
-                  {options.find(o => o.value == value.BlackLevel).label}
+                  {levelOptions.find(o => o.value == value.BlackLevel).label}
                 </td>
                 <td >
                   {!value.Status ? "pending analysis" : value.Black1stChoice}
@@ -269,7 +282,7 @@ function CheatAnalysis() {
                   White
                 </td>
                 <td >
-                  {options.find(o => o.value == value.WhiteLevel).label}
+                  {levelOptions.find(o => o.value == value.WhiteLevel).label}
                 </td>
                 <td >
                   {!value.Status ? "pending analysis" : value.White1stChoice}

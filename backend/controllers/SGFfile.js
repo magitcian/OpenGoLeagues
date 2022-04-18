@@ -45,7 +45,7 @@ const multerUploads = multer({
 }).single("file");
 
 router.post('/upload', validateToken, multerUploads, async function (req, res) {
-  const { blackLevel, whiteLevel } = req.body;
+  const { blackLevel, whiteLevel, visits } = req.body;
   const blackPlayerLevel = await Level.findOne({ where: { levelNumber: blackLevel } });
   const whitePlayerLevel = await Level.findOne({ where: { levelNumber: whiteLevel } });
   let isFileFormatCorrect = await correctFileFormat(fileDestination + newFileName);
@@ -69,6 +69,7 @@ router.post('/upload', validateToken, multerUploads, async function (req, res) {
       "IsWhiteCheating": false,
 
       "SgfFileName": newFileName,
+      "VisitsAverage" : visits,
       "PlayerUserId": req.user.id,
       "createdAt": fileDate,
       "Status": 0,

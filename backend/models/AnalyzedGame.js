@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.BOOLEAN,
             allowNull: false,
         },
+        VisitsAverage: {
+            type: DataTypes.DOUBLE,
+            allowNull: false,
+        },
         BlackLevel: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -29,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         BlackMatchRateOfMoves1And2: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DOUBLE,
             allowNull: false,
         },
         IsBlackCheating: {
@@ -58,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         WhiteMatchRateOfMoves1And2: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DOUBLE,
             allowNull: false,
         },
         IsWhiteCheating: {

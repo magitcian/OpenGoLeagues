@@ -44,7 +44,7 @@ function CheatAnalysis() {
           headers: { accessToken: localStorage.getItem("accessToken") },
         })
         .then((response) => {
-          console.log(response.data);
+          //console.log(response.data);
           setListOfAnalyzedGame(response.data.listOfAnalyzedGame);
         });
     }
@@ -74,7 +74,7 @@ function CheatAnalysis() {
         headers: { accessToken: localStorage.getItem("accessToken") },
       }).then(response => response.json())
         .then(response => {
-          console.log(response);
+          //console.log(response);
           if (response.error === undefined) {
             setListOfAnalyzedGame([response.analyzedGame, ...listOfAnalyzedGame]);
             axios
@@ -86,6 +86,12 @@ function CheatAnalysis() {
                   headers: { accessToken: localStorage.getItem("accessToken") },
                 },
               ).then((response) => {
+                //console.log(response.data);
+                setListOfAnalyzedGame([response.data.AnalyzedGame, ...
+                  listOfAnalyzedGame.filter((game) => {
+                    return game.id != response.data.AnalyzedGame.id;
+                  })
+                ]);
               });
           } else {
             alert(response.error);

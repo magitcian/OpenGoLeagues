@@ -35,58 +35,75 @@ function getLeelazPathAccordingToOS(OStype) {
     return leelaz;
 }
 
-async function createAnalysisFileWithLeela(OStype, sgfFile) {
-    const { spawn } = require('child_process');
-    let leelaz = getLeelazPathAccordingToOS(OStype);
-    const bat = spawn(leelaz.path, ['-w', leelaz.networkPath, '-g', '--lagbuffer', '0']);
+function createAnalysisFileWithLeela(OStype, sgfFile) {
 
-    const fs = require('fs')
-    let fini = false;
-    let rep_analyze = "";
-    let rep_move = "";
+    return new Promise(async (resolve, reject) => {
+        const sleep1S = 1000;
+        const sleep3S = 3000;
 
-    bat.stdout.on('data', async (data) => {
-        rep_move += data.toString();
-        console.log(data.toString());
-        if (rep_move.includes("cannot undo") && !fini) {
-            fini = true;
-            fs.writeFile(fileDestination + sgfFile.SgfFileName.substring(0, sgfFile.SgfFileName.length - 4) + '_analyze.txt', rep_analyze, err => {
-                if (err) {
-                    console.error(err);
-                }
-                return;
-            })
-            console.log("finish!");
-            bat.stdin.write("quit\n");
-            bat.kill();
+        const { spawn } = require('child_process');
+        let leelaz = getLeelazPathAccordingToOS(OStype);
+        const bat = spawn(leelaz.path, ['-w', leelaz.networkPath, '-g', '--lagbuffer', '0']);
+    
+        const fs = require('fs')
+        let rep_analyze = "";
+        let rep_move = "";
+        let finish = false;
+
+        bat.stdout.on('data', async (data) => {
+            rep_move += data.toString();
+            console.log(data.toString());
+            if (rep_move.includes("cannot undo") && !finish) {
+                finish = true;
+                fs.writeFile(fileDestination + sgfFile.SgfFileName.substring(0, sgfFile.SgfFileName.length - 4) + '_analyze.txt', rep_analyze, err => {
+                    if (err) {
+                        console.error(err);
+                        reject("FAILURE");
+                    }else{
+                        resolve("SUCCESS");
+                    }
+                    return;
+                })
+                console.log("finish!");
+                bat.stdin.write("quit\n");
+                bat.kill();
+            }
+        });
+    
+        let i = 4;
+        let prevRep = "";
+        bat.stderr.on('data', async (data) => {
+            let curRep = data.toString();
+            rep_analyze += curRep;
+            console.log(curRep);
+            if ((prevRep + curRep).includes("visits,")) {
+                ++i;
+                bat.stdin.write(i.toString() + " undo \n");
+                await sleep(sleep1S);
+                ++i;
+                bat.stdin.write(i.toString() + " lz-analyze 0 \n");
+                prevRep = "";
+            }else{
+                prevRep = curRep;
+            }
+        });
+    
+        
+        bat.on('exit', (code) => {
+            console.log(`Child exited with code ${code}`);
+        });
+    
+        bat.stdin.write(1 + " loadsgf " + fileDestination + sgfFile.SgfFileName + "\n");
+        if (OStype == "w") {
+            bat.stdin.write(2 + " lz-setoption name visits value " + sgfFile.VisitsAverage + "\n");
         }
-    });
+        await sleep(sleep3S);
+        bat.stdin.write(3 + " undo \n");
+        await sleep(sleep1S);
+        bat.stdin.write(4 + " lz-analyze 0 \n");
 
-    bat.stderr.on('data', (data) => {
-        rep_analyze += data.toString();
-        console.log(data.toString());
-    });
+      })
 
-    let i = 1;
-
-    bat.stdin.write(i.toString() + " loadsgf " + fileDestination + sgfFile.SgfFileName + "\n");
-    if (OStype == "w") {
-        bat.stdin.write(i.toString() + " lz-setoption name visits value " + sgfFile.VisitsAverage + "\n");
-    }
-
-    await sleep(3000);
-    while (!fini) {
-        ++i;
-        //console.log(i);
-        bat.stdin.write(i.toString() + " undo \n");
-        await sleep(1000);
-        bat.stdin.write(i.toString() + " lz-analyze 0 \n");
-        await sleep(5000);
-    }
-
-    bat.on('exit', (code) => {
-        console.log(`Child exited with code ${code}`);
-    });
 }
 
 
@@ -156,7 +173,7 @@ function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {
         }
     }
 
-    visitsAverage = visitsAverage/countMove;
+    visitsAverage = Math.floor(visitsAverage/countMove);
     let blackMatchRateOfMoves1And2 = ((black1stChoice) / (black1stChoice + black2ndChoice + blackNot12Choice) * 100).toFixed(2);
     let blackTotalAnalyzedMoves = black1stChoice + black2ndChoice + blackNot12Choice;
     let isBlackCheating = false;

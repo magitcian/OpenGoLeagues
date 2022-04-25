@@ -2,5 +2,11 @@
 
 # dependencies
 /node_modules
-/data/OpenGoLeagues.db
 /SGFfiles/*
+
+# database
+OpenGoLeagues.db
+GoStatistics.db
+
+# file created by leelaz
+leelaz_opencl_tuning

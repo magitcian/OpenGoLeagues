@@ -4,26 +4,29 @@ const cors = require('cors')
 const { User, AnalyzedGame } = require("../models");
 const { validateToken } = require("../middlewares/AuthMiddleware");
 
-let fileDestination = "./SGFfiles/";
+const OStype = "w"; // l for linux
 
 router.post('/analyzed', validateToken, async function (req, res) {
     const { fileId } = req.body;
     const sgfFile = await AnalyzedGame.findOne({ where: { id: fileId, PlayerUserId: req.user.id, status: 0 } });
     if (sgfFile) {
-        await createAnalysisFileWithLeela("w", sgfFile);
-        let analyzedGame = await updateAnalysisInDB(sgfFile);
+        const filePath = "./SGFfiles/";
+        await createAnalysisFileWithLeela(filePath, sgfFile);
+        let analyzedGame = await updateAnalysisInDB(filePath, sgfFile);
         res.json({ AnalyzedGame: analyzedGame });
     } else {
         res.json({ error: "There is no game to analyze!" });
     }
 })
 
-function getLeelazPathAccordingToOS(OStype) {
+function getLeelazPathAccordingToOS() {
     let leelazPath = "";
     let networkPath = "";
     if (OStype == "w") {
-        leelazPath = '../leelaZero/win/leela-zero-0.17-win64/leelaz.exe';
-        networkPath = '..\\leelaZero\\networks\\best-network'
+        // leelazPath = '../leelaZero/win/leela-zero-0.17-win64/leelaz.exe';
+        // networkPath = '..\\leelaZero\\networks\\best-network'
+        leelazPath = '../../leelaZero/win/leela-zero-0.17-win64/leelaz.exe';
+        networkPath = '..\\..\\leelaZero\\networks\\best-network'
     } else {
         leelazPath = '../leelaZero/linux/leela-zero/build/leelaz';
         networkPath = '../leelaZero/networks/best-network';
@@ -35,7 +38,7 @@ function getLeelazPathAccordingToOS(OStype) {
     return leelaz;
 }
 
-function createAnalysisFileWithLeela(OStype, sgfFile) {
+function createAnalysisFileWithLeela(filePath, sgfFile) {
 
     return new Promise(async (resolve, reject) => {
         const sleep1S = 1000;
@@ -55,7 +58,7 @@ function createAnalysisFileWithLeela(OStype, sgfFile) {
             console.log(data.toString());
             if (rep_move.includes("cannot undo") && !finish) {
                 finish = true;
-                fs.writeFile(fileDestination + sgfFile.SgfFileName.substring(0, sgfFile.SgfFileName.length - 4) + '_analyze.txt', rep_analyze, err => {
+                fs.writeFile(filePath + sgfFile.SgfFileName.substring(0, sgfFile.SgfFileName.length - 4) + '_analyze.txt', rep_analyze, err => {
                     if (err) {
                         console.error(err);
                         reject("FAILURE");
@@ -92,8 +95,8 @@ function createAnalysisFileWithLeela(OStype, sgfFile) {
         bat.on('exit', (code) => {
             console.log(`Child exited with code ${code}`);
         });
-    
-        bat.stdin.write(1 + " loadsgf " + fileDestination + sgfFile.SgfFileName + "\n");
+        console.log(10, filePath + sgfFile.SgfFileName);
+        bat.stdin.write(1 + " loadsgf " + filePath + sgfFile.SgfFileName + "\n");
         if (OStype == "w") {
             bat.stdin.write(2 + " lz-setoption name visits value " + sgfFile.VisitsAverage + "\n");
         }
@@ -107,10 +110,10 @@ function createAnalysisFileWithLeela(OStype, sgfFile) {
 }
 
 
-async function updateAnalysisInDB(sgfFile) {
+async function updateAnalysisInDB(filePath, sgfFile) {
     const sgfFileController = require("./SGFfile");
-    let listOfMoves = await sgfFileController.getMovesFromFile(fileDestination + sgfFile.SgfFileName);
-    let listOfLeelazMoves = await getProposedMovesFromAnalysisFile(fileDestination + sgfFile.SgfFileName.substring(0, sgfFile.SgfFileName.length - 4) + '_analyze.txt');
+    let listOfMoves = await sgfFileController.getMovesFromFile(filePath + sgfFile.SgfFileName);
+    let listOfLeelazMoves = await getProposedMovesFromAnalysisFile(filePath + sgfFile.SgfFileName.substring(0, sgfFile.SgfFileName.length - 4) + '_analyze.txt');
     // console.log(1, listOfMoves);
     // console.log(2, listOfLeelazMoves);
     let analyzedGame = getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves);
@@ -264,4 +267,11 @@ function sleep(ms) {
 //node -e 'require("./LeelaZero").finalAnalyze("../SGFfiles/liusasori-pinenisan2_2022-03-15_22.37.49.sgf")'
 //node -e 'require("./LeelaZero").testAnalyze()'
 
-module.exports = router;
+//module.exports = router;
+
+module.exports = {
+    router: router,
+    createAnalysisFileWithLeela: createAnalysisFileWithLeela,
+    getProposedMovesFromAnalysisFile: getProposedMovesFromAnalysisFile,
+    getAnalyzedGame : getAnalyzedGame,
+  }

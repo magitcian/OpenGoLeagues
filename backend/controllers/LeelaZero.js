@@ -19,14 +19,17 @@ router.post('/analyzed', validateToken, async function (req, res) {
     }
 })
 
-function getLeelazPathAccordingToOS() {
+function getLeelazPathAccordingToOS(sgfFile) {
     let leelazPath = "";
     let networkPath = "";
     if (OStype == "w") {
-        // leelazPath = '../leelaZero/win/leela-zero-0.17-win64/leelaz.exe';
-        // networkPath = '..\\leelaZero\\networks\\best-network'
-        leelazPath = '../../leelaZero/win/leela-zero-0.17-win64/leelaz.exe';
-        networkPath = '..\\..\\leelaZero\\networks\\best-network'
+        if (sgfFile.ForStatistics) {
+            leelazPath = '../../leelaZero/win/leela-zero-0.17-win64/leelaz.exe';
+            networkPath = '../../leelaZero/networks/best-network'
+        } else {
+            leelazPath = '../leelaZero/win/leela-zero-0.17-win64/leelaz.exe';
+            networkPath = '../leelaZero/networks/best-network'
+        }
     } else {
         leelazPath = '../leelaZero/linux/leela-zero/build/leelaz';
         networkPath = '../leelaZero/networks/best-network';
@@ -39,15 +42,14 @@ function getLeelazPathAccordingToOS() {
 }
 
 function createAnalysisFileWithLeela(filePath, sgfFile) {
-
     return new Promise(async (resolve, reject) => {
         const sleep1S = 1000;
         const sleep3S = 3000;
 
         const { spawn } = require('child_process');
-        let leelaz = getLeelazPathAccordingToOS(OStype);
+        let leelaz = getLeelazPathAccordingToOS(sgfFile);
         const bat = spawn(leelaz.path, ['-w', leelaz.networkPath, '-g', '--lagbuffer', '0']);
-    
+
         const fs = require('fs')
         let rep_analyze = "";
         let rep_move = "";
@@ -62,7 +64,7 @@ function createAnalysisFileWithLeela(filePath, sgfFile) {
                     if (err) {
                         console.error(err);
                         reject("FAILURE");
-                    }else{
+                    } else {
                         resolve("SUCCESS");
                     }
                     return;
@@ -72,7 +74,7 @@ function createAnalysisFileWithLeela(filePath, sgfFile) {
                 bat.kill();
             }
         });
-    
+
         let i = 4;
         let prevRep = "";
         bat.stderr.on('data', async (data) => {
@@ -86,12 +88,12 @@ function createAnalysisFileWithLeela(filePath, sgfFile) {
                 ++i;
                 bat.stdin.write(i.toString() + " lz-analyze 0 \n");
                 prevRep = "";
-            }else{
+            } else {
                 prevRep = curRep;
             }
         });
-    
-        
+
+
         bat.on('exit', (code) => {
             console.log(`Child exited with code ${code}`);
         });
@@ -105,7 +107,7 @@ function createAnalysisFileWithLeela(filePath, sgfFile) {
         await sleep(sleep1S);
         bat.stdin.write(4 + " lz-analyze 0 \n");
 
-      })
+    })
 
 }
 
@@ -176,7 +178,7 @@ function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {
         }
     }
 
-    visitsAverage = Math.floor(visitsAverage/countMove);
+    visitsAverage = Math.floor(visitsAverage / countMove);
     let blackMatchRateOfMoves1And2 = ((black1stChoice) / (black1stChoice + black2ndChoice + blackNot12Choice) * 100).toFixed(2);
     let blackTotalAnalyzedMoves = black1stChoice + black2ndChoice + blackNot12Choice;
     let isBlackCheating = false;
@@ -273,5 +275,5 @@ module.exports = {
     router: router,
     createAnalysisFileWithLeela: createAnalysisFileWithLeela,
     getProposedMovesFromAnalysisFile: getProposedMovesFromAnalysisFile,
-    getAnalyzedGame : getAnalyzedGame,
-  }
+    getAnalyzedGame: getAnalyzedGame,
+}

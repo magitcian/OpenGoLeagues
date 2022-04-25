@@ -1,3 +1,4 @@
+//Command : node index.js
 const prompt = require('prompt-sync')();
 const leelaAnalyzer = require("../controllers/LeelaZero");
 const sgfAnalyzer = require("../controllers/SGFfile");
@@ -40,15 +41,15 @@ async function launchAnalysisOnFiles() {
   for (const f of listOfFiles) {
     for (i = 0; i < 3; ++i) {
       f.VisitsAverage = listOfAverage[i];
+      f.ForStatistics = true;
       console.log(f);
       await analyseSGFfile(f);
     }
-
   }
 }
 
 async function analyseSGFfile(f) {
-  let levels = await obtainLevelsFromSGFfile(f);
+  let levels = await getLevelsFromSGFfile(f);
   if (levels) {
     //rename analysis file with VisitsAverage:
     aFileName = f.Path + f.SgfFileName.substring(0, f.SgfFileName.length - 4) + '_analyze.txt';
@@ -69,10 +70,9 @@ async function analyseSGFfile(f) {
   } else {
     console.log("No level found in file!")
   }
-
 }
 
-async function obtainLevelsFromSGFfile(f) {
+async function getLevelsFromSGFfile(f) {
   let containtBin = await loadFileContent(f.Path + f.SgfFileName);
   let containtStr = containtBin.toString();
   let arrayOfinfo = containtStr.split(";");

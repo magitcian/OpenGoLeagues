@@ -3,8 +3,9 @@ const router = express.Router();
 const cors = require('cors')
 const { User, AnalyzedGame } = require("../models");
 const { validateToken } = require("../middlewares/AuthMiddleware");
-
+const sgfFileController = require("./SGFfile");
 const OStype = "w"; // l for linux
+const NumOfMovesToAnalyze = 150;
 
 router.post('/analyzed', validateToken, async function (req, res) {
     const { fileId } = req.body;
@@ -20,19 +21,14 @@ router.post('/analyzed', validateToken, async function (req, res) {
 })
 
 function getLeelazPathAccordingToOS(sgfFile) {
-    let leelazPath = "";
-    let networkPath = "";
+    let leelazPath = '../leelaZero/linux/leela-zero/build/leelaz'; //linux
+    let networkPath = '../leelaZero/networks/best-network';
     if (OStype == "w") {
-        if (sgfFile.ForStatistics) {
-            leelazPath = '../../leelaZero/win/leela-zero-0.17-win64/leelaz.exe';
-            networkPath = '../../leelaZero/networks/best-network'
-        } else {
-            leelazPath = '../leelaZero/win/leela-zero-0.17-win64/leelaz.exe';
-            networkPath = '../leelaZero/networks/best-network'
-        }
-    } else {
-        leelazPath = '../leelaZero/linux/leela-zero/build/leelaz';
-        networkPath = '../leelaZero/networks/best-network';
+        leelazPath = '../leelaZero/win/leela-zero-0.17-win64/leelaz.exe'; //windows
+    }
+    if (sgfFile.ForStatistics) {
+        leelazPath = '../' + leelazPath;
+        networkPath = '../' + networkPath;
     }
     let leelaz = {
         "path": leelazPath,
@@ -44,76 +40,106 @@ function getLeelazPathAccordingToOS(sgfFile) {
 function createAnalysisFileWithLeela(filePath, sgfFile) {
     return new Promise(async (resolve, reject) => {
         const sleep1S = 1000;
-        const sleep3S = 3000;
+        const sleep5S = 5000;
+
+        let listOfMoves = await sgfFileController.getMovesFromFile(filePath + sgfFile.SgfFileName);
+        let countMove = listOfMoves.length > NumOfMovesToAnalyze ? NumOfMovesToAnalyze : listOfMoves.length;
+        const countHandStones = listOfMoves.filter(m => m.handicapStone).length;
+
+        console.log(countMove);
+        console.log(listOfMoves);
+        console.log(countHandStones);
 
         const { spawn } = require('child_process');
         let leelaz = getLeelazPathAccordingToOS(sgfFile);
-        const bat = spawn(leelaz.path, ['-w', leelaz.networkPath, '-g', '--lagbuffer', '0']);
+        const bat = spawn(leelaz.path, ['-w', leelaz.networkPath, '-g', '--lagbuffer', '0']); //, '-g', '--lagbuffer', '0'
 
         const fs = require('fs')
         let rep_analyze = "";
         let rep_move = "";
         let finish = false;
 
-        bat.stdout.on('data', async (data) => {
+        bat.stdout.on('data', (data) => {
             rep_move += data.toString();
             console.log(data.toString());
-            if (rep_move.includes("cannot undo") && !finish) {
-                finish = true;
-                fs.writeFile(filePath + sgfFile.SgfFileName.substring(0, sgfFile.SgfFileName.length - 4) + '_analyze.txt', rep_analyze, err => {
-                    if (err) {
-                        console.error(err);
-                        reject("FAILURE");
-                    } else {
-                        resolve("SUCCESS");
-                    }
-                    return;
-                })
-                console.log("finish!");
-                bat.stdin.write("quit\n");
-                bat.kill();
-            }
+            // if (rep_move.includes("cannot undo") && !finish) {
+            //     finish = true;
+
+            //     console.log("finish!");
+            //     bat.stdin.write("quit\n");
+            //     bat.kill();
+            // }
         });
 
-        let i = 4;
+        let k = 4;
+        let j = countHandStones;
         let prevRep = "";
         bat.stderr.on('data', async (data) => {
+            console.log(data.toString());
             let curRep = data.toString();
             rep_analyze += curRep;
-            console.log(curRep);
             if ((prevRep + curRep).includes("visits,")) {
-                ++i;
-                bat.stdin.write(i.toString() + " undo \n");
-                await sleep(sleep1S);
-                ++i;
-                bat.stdin.write(i.toString() + " lz-analyze 0 \n");
-                prevRep = "";
+                if(j < countMove){
+                    console.log(listOfMoves[j]);
+                    console.log(k.toString() + " play " + listOfMoves[j].colorShort + " " + listOfMoves[j].posLeela + " \n");
+                    bat.stdin.write(k.toString() + " play " + listOfMoves[j].colorShort + " " + listOfMoves[j].posLeela + " \n");
+                    await sleep(5000);
+                    ++k;
+                    bat.stdin.write(k.toString() + " lz-analyze 0 \n");
+                    ++j;
+                    ++k;
+                    prevRep = "";
+                }else{
+                    fs.writeFile(filePath + sgfFile.SgfFileName.substring(0, sgfFile.SgfFileName.length - 4) + '_analyze.txt', rep_analyze, err => {
+                        if (err) {
+                            console.error(err);
+                            reject("FAILURE");
+                        } else {
+                            resolve("SUCCESS");
+                        }
+                        return;
+                    })
+                    console.log("finish!");
+                    bat.stdin.write("quit\n");
+                    bat.kill();
+                }
             } else {
                 prevRep = curRep;
             }
         });
 
+        //bat.stdin.write(1 + " loadsgf " + filePath + sgfFile.SgfFileName + "\n");
+        if (OStype == "w") {
+            bat.stdin.write(2 + " lz-setoption name visits value " + sgfFile.VisitsAverage + "\n");
+        }
+        await sleep(sleep5S);
+        
+        for (i = 0; i < countHandStones; ++i){
+            bat.stdin.write(i.toString() + " play " + listOfMoves[i].colorShort + " " + listOfMoves[i].posLeela + " \n");
+            await sleep(sleep1S);
+        }
+        bat.stdin.write(3 + " lz-analyze 0 \n");
+
+        // while (movesNotToAnalyse > 0) {
+        //     console.log(movesNotToAnalyse, "undo!");
+        //     bat.stdin.write(3 + " undo \n");
+        //     await sleep(sleep1S);
+        //     --movesNotToAnalyse;
+        //     if(movesNotToAnalyse == 0){
+        //         bat.stdin.write(4 + " lz-analyze 0 \n");
+        //     }
+        // }
 
         bat.on('exit', (code) => {
             console.log(`Child exited with code ${code}`);
         });
-        console.log(10, filePath + sgfFile.SgfFileName);
-        bat.stdin.write(1 + " loadsgf " + filePath + sgfFile.SgfFileName + "\n");
-        if (OStype == "w") {
-            bat.stdin.write(2 + " lz-setoption name visits value " + sgfFile.VisitsAverage + "\n");
-        }
-        await sleep(sleep3S);
-        bat.stdin.write(3 + " undo \n");
-        await sleep(sleep1S);
-        bat.stdin.write(4 + " lz-analyze 0 \n");
+        
 
     })
-
 }
 
 
 async function updateAnalysisInDB(filePath, sgfFile) {
-    const sgfFileController = require("./SGFfile");
     let listOfMoves = await sgfFileController.getMovesFromFile(filePath + sgfFile.SgfFileName);
     let listOfLeelazMoves = await getProposedMovesFromAnalysisFile(filePath + sgfFile.SgfFileName.substring(0, sgfFile.SgfFileName.length - 4) + '_analyze.txt');
     // console.log(1, listOfMoves);
@@ -135,11 +161,15 @@ function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {
     let whiteUnexpectedMoves = 0;
 
     let visitsAverage = 0;
-    let countMove = listOfMoves.length > 150 ? 150 : listOfMoves.length; //pour n'analyser que les 150 premiers coups
-    for (let i = 0; i < countMove; ++i) {
+    let countMove = listOfMoves.length > NumOfMovesToAnalyze ? NumOfMovesToAnalyze : listOfMoves.length; //pour n'analyser que les 150 premiers coups
+    const countHandStones = listOfMoves.filter(m => m.handicapStone).length;
+
+    for (let i = countHandStones; i < countMove; ++i) {
 
         let move = listOfMoves[i];
-        let LeelazMoves = listOfLeelazMoves[i];
+        console.log(move);
+        let LeelazMoves = listOfLeelazMoves[i-countHandStones];
+        console.log(LeelazMoves);
         visitsAverage += parseInt(LeelazMoves[0].visits);
 
         if (move.colorShort == "W") {
@@ -226,7 +256,8 @@ async function getProposedMovesFromAnalysisFile(analysisFilePath) {
     let contentStr = contentBin.toString();
     let arrayOfAnalysisStr = contentStr.split("NN eval=");
 
-    for (let i = arrayOfAnalysisStr.length - 1; i > 0; --i) {
+    //console.log(arrayOfAnalysisStr);
+    for (let i = 1; i < arrayOfAnalysisStr.length; ++i) {
         let listOfProposedMoves = new Array();
         let AnalysisStr = arrayOfAnalysisStr[i].split("\r\n"); // "\n" : sur linux
 

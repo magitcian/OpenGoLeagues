@@ -5,7 +5,6 @@ const sgfAnalyzer = require("../controllers/SGFfile");
 const statistics = require("./changeStatistics");
 const fs = require('fs');
 
-const test = "dgfsdgq";
 let listOfFiles = [];
 
 //let nodePath = prompt('Which folder to analyse ?'); //D:\TempWork\testLeela\parties
@@ -20,7 +19,7 @@ if (fs.existsSync(nodePath)) {
 
 function getAllFiles(nodePath, nodeName) {
   let node = nodePath + "/" + nodeName;
-  console.log(node);
+  //console.log(node);
   if (fs.lstatSync(node).isFile()) {
     let file = {
       "Path": nodePath + "/",
@@ -42,7 +41,7 @@ async function launchAnalysisOnFiles() {
     for (i = 0; i < 3; ++i) {
       f.VisitsAverage = listOfAverage[i];
       f.ForStatistics = true;
-      console.log(f);
+      //console.log(f);
       await analyseSGFfile(f);
     }
   }

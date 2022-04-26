@@ -1,3 +1,5 @@
+//Command : npm start
+//Build : npm run build
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';

@@ -69,7 +69,7 @@ router.post('/upload', validateToken, multerUploads, async function (req, res) {
       "IsWhiteCheating": false,
 
       "SgfFileName": newFileName,
-      "VisitsAverage" : visits,
+      "VisitsAverage": visits,
       "PlayerUserId": req.user.id,
       "createdAt": fileDate,
       "Status": 0,
@@ -90,8 +90,8 @@ router.post('/download', validateToken, upload.none(), async function (req, res)
   if (sgfFile) {
     const fs = require('fs')
     const pathFile = __dirname.substring(0, __dirname.length - 11) + "SGFfiles\\" + sgfFile.SgfFileName;
-    if (fs.existsSync(pathFile)) { 
-      res.append('fileName', sgfFile.SgfFileName); 
+    if (fs.existsSync(pathFile)) {
+      res.append('fileName', sgfFile.SgfFileName);
       res.status(200).sendFile(pathFile);
     } else {
       res.status(400).send({ error: "File doesn't exists!" });
@@ -149,16 +149,40 @@ async function correctFileFormat(filePath) {
 
 async function getMovesFromFile(filePath) {
   let arrayOfMovesObj = new Array();
+  const alphaNormal = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's'];
+  const alphaLeela = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']; //pas de i !!!!
+
   let movesBin = await loadFileContent(filePath);
   let movesStr = movesBin.toString();
   let arrayOfMovesStr = movesStr.split(";");
+
+  console.log(arrayOfMovesStr);
+  let AB = arrayOfMovesStr[1].split("AB[");
+  let handStones = AB[1].split("[");
+
+  handStones.forEach(hs => {
+    console.log(hs);
+    let positionFile = hs.split("]")[0];
+    let posLeela1 = alphaLeela[alphaNormal.indexOf(positionFile.charAt(0))];
+    let posLeela2 = 19 - alphaNormal.indexOf(positionFile.charAt(1));
+    let moveObj =
+    {
+      "colorShort": "B",
+      "colorLong": "black",
+      "positionFile": positionFile,
+      "posLeela1": posLeela1,
+      "posLeela2": posLeela2,
+      "posLeela": posLeela1 + posLeela2,
+      "time": 0,
+      "handicapStone": true,
+    }
+    arrayOfMovesObj.push(moveObj);
+  })
 
   for (let i = 2; i < arrayOfMovesStr.length; ++i) {
     let moveStr = arrayOfMovesStr[i];
     if (moveStr.includes("[") && moveStr.includes("]")) {
       let positionFile = moveStr.substring(2, 4).includes("]") ? "pass" : moveStr.substring(2, 4);
-      let alphaNormal = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's'];
-      let alphaLeela = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']; //pas de i !!!!
 
       let posLeela1 = "pass"
       let posLeela2 = 0;
@@ -176,6 +200,7 @@ async function getMovesFromFile(filePath) {
         "posLeela2": posLeela2,
         "posLeela": posLeela1 == "pass" ? posLeela1 : posLeela1 + posLeela2,
         "time": moveStr.substring(8, 10),
+        "handicapStone": false,
       }
       //console.log(moveObj);
       if ((moveObj.colorShort === "W" || moveObj.colorShort === "B") && moveObj.posLeela1 !== undefined) {

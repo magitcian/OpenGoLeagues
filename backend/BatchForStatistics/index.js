@@ -58,7 +58,7 @@ async function analyseSGFfile(f) {
       fs.rename(aFileName, aFileNameNew, function (err) {
         if (err) console.log('ERROR: ' + err);
       });
-      let listOfMoves = await sgfAnalyzer.getMovesFromFile(f.Path + f.SgfFileName);
+      let listOfMoves = await sgfAnalyzer.getMovesFromSGFfile(f.Path + f.SgfFileName);
       let listOfLeelazMoves = await leelaAnalyzer.getProposedMovesFromAnalysisFile(aFileNameNew);
       let statGame = leelaAnalyzer.getAnalyzedGame(f, listOfMoves, listOfLeelazMoves);
       statGame.Path = f.Path;

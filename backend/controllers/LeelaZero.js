@@ -3,8 +3,9 @@ const router = express.Router();
 const cors = require('cors')
 const { User, AnalyzedGame } = require("../models");
 const { validateToken } = require("../middlewares/AuthMiddleware");
-
+const sgfFileController = require("./SGFfile");
 const OStype = "w"; // l for linux
+const NumOfMovesToAnalyze = 150;
 
 router.post('/analyzed', validateToken, async function (req, res) {
     const { fileId } = req.body;
@@ -20,19 +21,14 @@ router.post('/analyzed', validateToken, async function (req, res) {
 })
 
 function getLeelazPathAccordingToOS(sgfFile) {
-    let leelazPath = "";
-    let networkPath = "";
+    let leelazPath = '../leelaZero/linux/leela-zero/build/leelaz'; //linux
+    let networkPath = '../leelaZero/networks/best-network';
     if (OStype == "w") {
-        if (sgfFile.ForStatistics) {
-            leelazPath = '../../leelaZero/win/leela-zero-0.17-win64/leelaz.exe';
-            networkPath = '../../leelaZero/networks/best-network'
-        } else {
-            leelazPath = '../leelaZero/win/leela-zero-0.17-win64/leelaz.exe';
-            networkPath = '../leelaZero/networks/best-network'
-        }
-    } else {
-        leelazPath = '../leelaZero/linux/leela-zero/build/leelaz';
-        networkPath = '../leelaZero/networks/best-network';
+        leelazPath = '../leelaZero/win/leela-zero-0.17-win64/leelaz.exe'; //windows
+    }
+    if (sgfFile.ForStatistics) {
+        leelazPath = '../' + leelazPath;
+        networkPath = '../' + networkPath;
     }
     let leelaz = {
         "path": leelazPath,
@@ -43,8 +39,8 @@ function getLeelazPathAccordingToOS(sgfFile) {
 
 function createAnalysisFileWithLeela(filePath, sgfFile) {
     return new Promise(async (resolve, reject) => {
-        const sleep1S = 1000;
-        const sleep3S = 3000;
+        const sleep0p5S = 500;
+        const sleep10S = 10000;
 
         const { spawn } = require('child_process');
         let leelaz = getLeelazPathAccordingToOS(sgfFile);
@@ -84,7 +80,7 @@ function createAnalysisFileWithLeela(filePath, sgfFile) {
             if ((prevRep + curRep).includes("visits,")) {
                 ++i;
                 bat.stdin.write(i.toString() + " undo \n");
-                await sleep(sleep1S);
+                await sleep(sleep0p5S);
                 ++i;
                 bat.stdin.write(i.toString() + " lz-analyze 0 \n");
                 prevRep = "";
@@ -93,19 +89,25 @@ function createAnalysisFileWithLeela(filePath, sgfFile) {
             }
         });
 
-
-        bat.on('exit', (code) => {
-            console.log(`Child exited with code ${code}`);
-        });
-        console.log(10, filePath + sgfFile.SgfFileName);
         bat.stdin.write(1 + " loadsgf " + filePath + sgfFile.SgfFileName + "\n");
         if (OStype == "w") {
             bat.stdin.write(2 + " lz-setoption name visits value " + sgfFile.VisitsAverage + "\n");
         }
-        await sleep(sleep3S);
-        bat.stdin.write(3 + " undo \n");
-        await sleep(sleep1S);
+        await sleep(sleep10S);
+
+        let listOfMoves = await sgfFileController.getMovesFromSGFfile(filePath + sgfFile.SgfFileName);
+        let movesNotToAnalyse = listOfMoves.length - NumOfMovesToAnalyze;
+        while (movesNotToAnalyse > 0) {
+            console.log(movesNotToAnalyse, "undo!");
+            bat.stdin.write(3 + " undo \n");
+            await sleep(sleep0p5S);
+            --movesNotToAnalyse;
+        }
         bat.stdin.write(4 + " lz-analyze 0 \n");
+
+        bat.on('exit', (code) => {
+            console.log(`Child exited with code ${code}`);
+        });
 
     })
 
@@ -114,7 +116,7 @@ function createAnalysisFileWithLeela(filePath, sgfFile) {
 
 async function updateAnalysisInDB(filePath, sgfFile) {
     const sgfFileController = require("./SGFfile");
-    let listOfMoves = await sgfFileController.getMovesFromFile(filePath + sgfFile.SgfFileName);
+    let listOfMoves = await sgfFileController.getMovesFromSGFfile(filePath + sgfFile.SgfFileName);
     let listOfLeelazMoves = await getProposedMovesFromAnalysisFile(filePath + sgfFile.SgfFileName.substring(0, sgfFile.SgfFileName.length - 4) + '_analyze.txt');
     // console.log(1, listOfMoves);
     // console.log(2, listOfLeelazMoves);
@@ -135,7 +137,8 @@ function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {
     let whiteUnexpectedMoves = 0;
 
     let visitsAverage = 0;
-    let countMove = listOfMoves.length > 150 ? 150 : listOfMoves.length; //pour n'analyser que les 150 premiers coups
+    const countMove = listOfMoves.length > NumOfMovesToAnalyze ? NumOfMovesToAnalyze : listOfMoves.length; //pour n'analyser que les 150 premiers coups
+    //const countHandStones = listOfMoves.filter(m => m.handicapStone).length;
     for (let i = 0; i < countMove; ++i) {
 
         let move = listOfMoves[i];

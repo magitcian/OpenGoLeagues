@@ -135,7 +135,7 @@ router.delete("/delete/:fileId", validateToken, async (req, res) => {
 
 async function correctFileFormat(filePath) {
   try {
-    let moves = await getMovesFromFile(filePath);
+    let moves = await getMovesFromSGFfile(filePath);
     if (moves.length !== 0) {
       return true;
     } else {
@@ -147,7 +147,7 @@ async function correctFileFormat(filePath) {
   }
 }
 
-async function getMovesFromFile(filePath) {
+async function getMovesFromSGFfile(filePath) {
   let arrayOfMovesObj = new Array();
   const alphaNormal = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's'];
   const alphaLeela = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']; //pas de i !!!!
@@ -156,34 +156,44 @@ async function getMovesFromFile(filePath) {
   let movesStr = movesBin.toString();
   let arrayOfMovesStr = movesStr.split(";");
 
-  console.log(arrayOfMovesStr);
-  let AB = arrayOfMovesStr[1].split("AB[");
-  let handStones = AB[1].split("[");
+  //To add handicap stones:
+  // console.log(arrayOfMovesStr);
+  // let AB = arrayOfMovesStr[1].split("AB[");
+  // let handStones = AB[1].split("[");
+  // handStones.forEach(hs => {
+  //   console.log(hs);
+  //   let positionFile = hs.split("]")[0];
+  //   let posLeela1 = alphaLeela[alphaNormal.indexOf(positionFile.charAt(0))];
+  //   let posLeela2 = 19 - alphaNormal.indexOf(positionFile.charAt(1));
+  //   let moveObj =
+  //   {
+  //     "colorShort": "B",
+  //     "colorLong": "black",
+  //     "positionFile": positionFile,
+  //     "posLeela1": posLeela1,
+  //     "posLeela2": posLeela2,
+  //     "posLeela": posLeela1 + posLeela2,
+  //     "time": 0,
+  //     "handicapStone": true,
+  //   }
+  //   arrayOfMovesObj.push(moveObj);
+  // })
 
-  handStones.forEach(hs => {
-    console.log(hs);
-    let positionFile = hs.split("]")[0];
-    let posLeela1 = alphaLeela[alphaNormal.indexOf(positionFile.charAt(0))];
-    let posLeela2 = 19 - alphaNormal.indexOf(positionFile.charAt(1));
-    let moveObj =
-    {
-      "colorShort": "B",
-      "colorLong": "black",
-      "positionFile": positionFile,
-      "posLeela1": posLeela1,
-      "posLeela2": posLeela2,
-      "posLeela": posLeela1 + posLeela2,
-      "time": 0,
-      "handicapStone": true,
-    }
-    arrayOfMovesObj.push(moveObj);
-  })
-
-  for (let i = 2; i < arrayOfMovesStr.length; ++i) {
+  let endOfMainMoves = false;
+  let i = 2;
+  while(i < arrayOfMovesStr.length && !endOfMainMoves){
+  //for (let i = 2; i < arrayOfMovesStr.length; ++i) {
     let moveStr = arrayOfMovesStr[i];
     if (moveStr.includes("[") && moveStr.includes("]")) {
-      let positionFile = moveStr.substring(2, 4).includes("]") ? "pass" : moveStr.substring(2, 4);
 
+      //Take into account only the first variations of the game:
+      //let moveSt = moveStr.replace('\n', '');
+      let markEndOfMainMoves = moveStr.substring(moveStr.length-3, moveStr.length);
+      if(markEndOfMainMoves == ")\n(" || markEndOfMainMoves.substring(1,3) == ")("){
+        endOfMainMoves = true;
+      }
+
+      let positionFile = moveStr.substring(2, 4).includes("]") ? "pass" : moveStr.substring(2, 4);
       let posLeela1 = "pass"
       let posLeela2 = 0;
       if (positionFile != "pass") {
@@ -207,6 +217,7 @@ async function getMovesFromFile(filePath) {
         arrayOfMovesObj.push(moveObj);
       }
     }
+    ++i;
   }
   return arrayOfMovesObj;
 }
@@ -221,5 +232,5 @@ async function loadFileContent(filePath) {
 
 module.exports = {
   router: router,
-  getMovesFromFile: getMovesFromFile,
+  getMovesFromSGFfile: getMovesFromSGFfile,
 }

@@ -15,9 +15,9 @@ const storage = multer.diskStorage({
     cb(null, fileDestination)
   },
   filename: (req, file, cb) => {
-    originalFileName = file.originalname;
+    originalFileName = file.originalname.replace(/\s/g, '');
     fileDate = new Date();
-    newFileName = originalFileName.substring(0, file.originalname.length - 4) + "_" + formatDate() + ".sgf";
+    newFileName = originalFileName.substring(0, originalFileName.length - 4) + "_" + formatDate() + ".sgf";
     cb(null, newFileName)
   },
 })
@@ -187,9 +187,9 @@ async function getMovesFromSGFfile(filePath) {
     if (moveStr.includes("[") && moveStr.includes("]")) {
 
       //Take into account only the first variations of the game:
-      //let moveSt = moveStr.replace('\n', '');
-      let markEndOfMainMoves = moveStr.substring(moveStr.length-3, moveStr.length);
-      if(markEndOfMainMoves == ")\n(" || markEndOfMainMoves.substring(1,3) == ")("){
+      let moveStrWOLF = moveStr.replace(/\n/g, '').replace(/\r/g, '');
+      let markEndOfMainMoves = moveStrWOLF.substring(moveStrWOLF.length-2, moveStrWOLF.length);
+      if(markEndOfMainMoves == ")("){
         endOfMainMoves = true;
       }
 

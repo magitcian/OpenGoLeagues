@@ -14,6 +14,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
+import ReactTooltip from 'react-tooltip';
 
 function CheatAnalysis() {
   const { authState } = useContext(AuthContext);
@@ -198,8 +199,8 @@ function CheatAnalysis() {
               <Select
                 name="blackLevel"
                 placeholder="Select black level"
-                value={levelOptions.find(obj => obj.value === blackLevel)} 
-                options={levelOptions} 
+                value={levelOptions.find(obj => obj.value === blackLevel)}
+                options={levelOptions}
                 //setFieldValue pour gérer les erreurs et setBlackLevel pour obtenir la valeur:
                 onChange={(e) => { setFieldValue("blackLevel", e.value); setBlackLevel(e.value) }}
               />
@@ -209,8 +210,8 @@ function CheatAnalysis() {
               <Select
                 name="whiteLevel"
                 placeholder="Select white level"
-                value={levelOptions.find(obj => obj.value === whiteLevel)} 
-                options={levelOptions} 
+                value={levelOptions.find(obj => obj.value === whiteLevel)}
+                options={levelOptions}
                 onChange={(e) => { setFieldValue("whiteLevel", e.value); setWhiteLevel(e.value) }}
               />
 
@@ -219,9 +220,9 @@ function CheatAnalysis() {
               <Select
                 name="visits"
                 placeholder="Select number of visits"
-                value={visitsOptions.find(obj => obj.value === visits)} 
-                options={visitsOptions} 
-                onChange={(e) => { setFieldValue("visits", e.value); setVisits(e.value) }} 
+                value={visitsOptions.find(obj => obj.value === visits)}
+                options={visitsOptions}
+                onChange={(e) => { setFieldValue("visits", e.value); setVisits(e.value) }}
               />
 
               <button type="submit">Send file to analyse</button>
@@ -232,7 +233,7 @@ function CheatAnalysis() {
       {status && <h4>{status}</h4>}
 
       <h1>Results</h1>
-
+      <ReactTooltip />
       <table className='resultCheating'>
         <thead>
           <tr>
@@ -241,8 +242,8 @@ function CheatAnalysis() {
             <th>Visits average</th>
             <th>Color</th>
             <th>Level</th>
-            <th>1st move correspondances</th>
-            <th>2nd move correspondances</th>
+            <th data-tip="1st move correspondances">1st move correspondances</th>
+            <th data-tip="2nd move correspondances">2nd move correspondances</th>
             <th>Unexpected moves</th>
             <th>Total of moves</th>
             <th>Rate moves 1</th>

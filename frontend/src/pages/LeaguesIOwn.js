@@ -35,21 +35,20 @@ function Home() {
       }
       {listOfLeagues.map((value, key) => {
         return (
-          <div key={key} className="league">
+          <div key={key} className="league league_click"
+            onClick={() => {
+              navigate(`/ManageLeague/${value.id}`);
+            }}>
             <div className="title"> {value.name} </div>
-            <div
-              className="body"
-              onClick={() => {
-                navigate(`/ManageLeague/${value.id}`);
-              }}
-            >
+            <div className="body">
               {value.description}
             </div>
             <div className="footer">
               <div className="managerName">
-            
+
               </div>
             </div>
+
           </div>
         );
       })}

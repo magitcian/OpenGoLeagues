@@ -30,8 +30,12 @@ body {
 
 .league:hover {
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.league_click:hover {
   cursor: pointer;
 }
+
 .league .title {
   flex: 20%;
   border-bottom: 1px solid lightgray;
@@ -67,6 +71,7 @@ body {
   /* flex: 5%; */
   /* border: 2px solid red; */
   margin-right: 15px;
+  cursor: pointer;
 }
 
 .footer .buttons {

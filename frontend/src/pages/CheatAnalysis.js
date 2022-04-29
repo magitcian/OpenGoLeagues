@@ -19,7 +19,7 @@ import ReactTooltip from 'react-tooltip';
 function CheatAnalysis() {
   const { authState } = useContext(AuthContext);
   let navigate = useNavigate();
-  const [listOfAnalyzedGame, setListOfAnalyzedGame] = useState([]);
+  const [listOfAnalyzedSGFfile, setListOfAnalyzedSGFfile] = useState([]);
   const [blackLevel, setBlackLevel] = useState("");
   const [whiteLevel, setWhiteLevel] = useState("");
   const [visits, setVisits] = useState("");
@@ -45,8 +45,8 @@ function CheatAnalysis() {
           headers: { accessToken: localStorage.getItem("accessToken") },
         })
         .then((response) => {
-          //console.log(response.data);
-          setListOfAnalyzedGame(response.data.listOfAnalyzedGame);
+          console.log(response.data);
+          setListOfAnalyzedSGFfile(response.data.listOfAnalyzedSGFfile);
         });
     }
   }, []);
@@ -77,20 +77,22 @@ function CheatAnalysis() {
         .then(response => {
           //console.log(response);
           if (response.error === undefined) {
-            setListOfAnalyzedGame([response.analyzedGame, ...listOfAnalyzedGame]);
+            console.log(response);
+            console.log(response.AnalyzedSGFfile);
+            setListOfAnalyzedSGFfile([response.AnalyzedSGFfile, ...listOfAnalyzedSGFfile]);
             axios
               .post(url + "leelaZero/analyzed",
                 {
-                  fileId: response.analyzedGame.id,
+                  fileId: response.AnalyzedSGFfile.id,
                 },
                 {
                   headers: { accessToken: localStorage.getItem("accessToken") },
                 },
               ).then((response) => {
-                //console.log(response.data);
-                setListOfAnalyzedGame([response.data.AnalyzedGame, ...
-                  listOfAnalyzedGame.filter((game) => {
-                    return game.id != response.data.AnalyzedGame.id;
+                console.log(response.data);
+                setListOfAnalyzedSGFfile([response.data.AnalyzedSGFfile, ...
+                  listOfAnalyzedSGFfile.filter((game) => {
+                    return game.id != response.data.AnalyzedSGFfile.id;
                   })
                 ]);
               });
@@ -143,8 +145,8 @@ function CheatAnalysis() {
         { headers: { accessToken: localStorage.getItem("accessToken") } },
       )
       .then((response) => {
-        setListOfAnalyzedGame(
-          listOfAnalyzedGame.filter((a) => {
+        setListOfAnalyzedSGFfile(
+          listOfAnalyzedSGFfile.filter((a) => {
             return a.id !== fileId;
           })
         );
@@ -171,7 +173,7 @@ function CheatAnalysis() {
       <h1>Upload a sgf file to server in order to analyze a game with Leela-Zero</h1>
       {/* {sgfFile.preview && <img src={sgfFile.preview} width='100' height='100' />} */}
       <hr></hr>
-      <div className='createPage'>
+      <div className='analysisContainer'>
         <Formik
           initialValues={initialValues}
           onSubmit={uploadFile}
@@ -233,105 +235,86 @@ function CheatAnalysis() {
       {status && <h4>{status}</h4>}
 
       <h1>Results</h1>
-      <ReactTooltip />
-      <table className='resultCheating'>
-        <thead>
-          <tr>
-            <th></th>
-            <th>FileName</th>
-            <th>Visits average</th>
-            <th>Color</th>
-            <th>Level</th>
-            <th data-tip="1st move correspondances">1st move correspondances</th>
-            <th data-tip="2nd move correspondances">2nd move correspondances</th>
-            <th>Unexpected moves</th>
-            <th>Total of moves</th>
-            <th>Rate moves 1</th>
-            <th>Is cheating ?</th>
+      <div className='analysisContainer'>
+        <ReactTooltip />
+        <table className='resultCheating'>
+          <thead>
+            <tr>
+              <th>  </th>
+              <th>FileName</th>
+              <th>Visits average</th>
+              <th>Color</th>
+              <th>Level</th>
+              <th data-tip="1st move correspondances">1st move correspondances</th>
+              <th data-tip="2nd move correspondances">2nd move correspondances</th>
+              <th>Unexpected moves</th>
+              <th>Total of moves</th>
+              <th>Rate moves 1</th>
+              <th>Is cheating ?</th>
 
-          </tr>
-        </thead>
+            </tr>
+          </thead>
 
-        {listOfAnalyzedGame.map((value, key) => {
-          return (
-            <tbody key={key} className="res">
-              <tr>
-                <td rowSpan="2" className="toDelete">
-                  <div className="deleteButtons">
-                    {value.Status && (
-                      <DeleteIcon onClick={() => { handleClickOpen(value.id) }}
-                      // onClick={() => {
-                      //   deleteAnalysis(value.id);
-                      // }}
-                      />
-                    )}
-                  </div>
-                </td>
-                <td rowSpan="2" className="toLeft">
-                  <span className="downloadFile" onClick={() => { downloadFile(value.id, value.SgfFileName) }}>{value.SgfFileName}</span>
-                </td>
-                <td rowSpan="2" >
-                  <span>{value.VisitsAverage}</span>
-                </td>
+          {listOfAnalyzedSGFfile.map((asgf, key) => {
+            return (
+              <tbody key={key} className="res">
+                {asgf.AnalyzedGames && asgf.AnalyzedGames.map((game, key) => {
+                  return (
+                    <tr key={key}>
+                      {game.Color === "b" && (
+                        <>
+                          <td rowSpan="2" className="toDelete">
+                            <div className="deleteButtons">
+                              {asgf.Status && (
+                                <DeleteIcon onClick={() => { handleClickOpen(asgf.id) }}
+                                // onClick={() => {
+                                //   deleteAnalysis(asgf.id);
+                                // }}
+                                />
+                              )}
+                            </div>
+                          </td>
+                          <td rowSpan="2" className="toLeft">
+                            <span className="downloadFile" onClick={() => { downloadFile(asgf.id, asgf.SgfFileName) }}>{asgf.SgfFileName}</span>
+                          </td>
+                          <td rowSpan="2" >
+                            <span>{asgf.VisitsAverage}</span>
+                          </td>
+                        </>
+                      )}
+                      <td >
+                        {game.Color === "b" ? "Black" : "White"}
+                      </td>
+                      <td >
+                        {levelOptions.find(o => o.value == game.Level).label}
+                      </td>
+                      <td >
+                        {!asgf.Status ? "pending analysis" : game["1stChoice"]}
+                      </td>
+                      <td>
+                        {!asgf.Status ? "pending analysis" : game["2ndChoice"]}
+                      </td>
+                      <td>
+                        {!asgf.Status ? "pending analysis" : game.UnexpectedMoves}
+                      </td>
+                      <td>
+                        {!asgf.Status ? "pending analysis" : game.TotalAnalyzedMoves}
+                      </td>
+                      <td >
+                        {!asgf.Status ? "pending analysis" : ((game["1stChoice"] / game.TotalAnalyzedMoves) * 100).toFixed(2)}
+                      </td>
+                      <td className={!asgf.Status ? "noValue" : game.IsCheating ? "yes" : "no"} >
+                        {!asgf.Status ? "pending analysis" : game.IsCheating ? "yes" : "no"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            );
+          })}
 
-                <td >
-                  Black
-                </td>
-                <td >
-                  {levelOptions.find(o => o.value == value.BlackLevel).label}
-                </td>
-                <td >
-                  {!value.Status ? "pending analysis" : value.Black1stChoice}
-                </td>
-                <td>
-                  {!value.Status ? "pending analysis" : value.Black2ndChoice}
-                </td>
-                <td>
-                  {!value.Status ? "pending analysis" : value.BlackUnexpectedMoves}
-                </td>
-                <td>
-                  {!value.Status ? "pending analysis" : value.BlackTotalAnalyzedMoves}
-                </td>
-                <td >
-                  {!value.Status ? "pending analysis" : value.BlackMatchRateOfMoves1And2}
-                </td>
-                <td className={!value.Status ? "noValue" : value.IsBlackCheating ? "yes" : "no"} >
-                  {!value.Status ? "pending analysis" : value.IsBlackCheating ? "yes" : "no"}
-                </td>
-              </tr>
-              <tr>
-                <td >
-                  White
-                </td>
-                <td >
-                  {levelOptions.find(o => o.value == value.WhiteLevel).label}
-                </td>
-                <td >
-                  {!value.Status ? "pending analysis" : value.White1stChoice}
-                </td>
-                <td>
-                  {!value.Status ? "pending analysis" : value.White2ndChoice}
-                </td>
-                <td>
-                  {!value.Status ? "pending analysis" : value.WhiteUnexpectedMoves}
-                </td>
-                <td>
-                  {!value.Status ? "pending analysis" : value.WhiteTotalAnalyzedMoves}
-                </td>
-                <td >
-                  {!value.Status ? "pending analysis" : value.WhiteMatchRateOfMoves1And2}
-                </td>
-                <td className={!value.Status ? "noValue" : value.IsWhiteCheating ? "yes" : "no"}>
-                  {!value.Status ? "pending analysis" : value.IsWhiteCheating ? "yes" : "no"}
-                </td>
-              </tr>
-            </tbody>
-
-          );
-        })}
-
-      </table>
-
+        </table>
+      </div>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>
           Deleting file and analysis

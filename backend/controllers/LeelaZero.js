@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router();
 const cors = require('cors')
-const { User, AnalyzedGame } = require("../models");
+const { User, AnalyzedSGFfile, AnalyzedGame } = require("../models");
 const { validateToken } = require("../middlewares/AuthMiddleware");
 const sgfFileController = require("./SGFfile");
 const OStype = "w"; // l for linux
@@ -9,12 +9,20 @@ const NumOfMovesToAnalyze = 150;
 
 router.post('/analyzed', validateToken, async function (req, res) {
     const { fileId } = req.body;
-    const sgfFile = await AnalyzedGame.findOne({ where: { id: fileId, PlayerUserId: req.user.id, status: 0 } });
+    const sgfFile = await AnalyzedSGFfile.findOne({
+        where: { id: fileId, PlayerUserId: req.user.id, status: 0 },
+        include: [{
+            model: AnalyzedGame,
+            order: [
+                ['Color', 'ASC'],
+            ],
+        }],
+    });
     if (sgfFile) {
         const filePath = "./SGFfiles/";
         await createAnalysisFileWithLeela(filePath, sgfFile);
-        let analyzedGame = await updateAnalysisInDB(filePath, sgfFile);
-        res.json({ AnalyzedGame: analyzedGame });
+        let analyzedSGFfile = await updateAnalysisInDB(filePath, sgfFile);
+        res.json({ AnalyzedSGFfile: analyzedSGFfile });
     } else {
         res.json({ error: "There is no game to analyze!" });
     }
@@ -46,7 +54,7 @@ function createAnalysisFileWithLeela(filePath, sgfFile) {
         let leelaz = getLeelazPathAccordingToOS(sgfFile);
         const bat = spawn(leelaz.path, ['-w', leelaz.networkPath, '-g', '--lagbuffer', '0']);
 
-        const fs = require('fs')
+        const fs = require('fs');
         let rep_analyze = "";
         let rep_move = "";
         let finish = false;
@@ -118,11 +126,12 @@ async function updateAnalysisInDB(filePath, sgfFile) {
     const sgfFileController = require("./SGFfile");
     let listOfMoves = await sgfFileController.getMovesFromSGFfile(filePath + sgfFile.SgfFileName);
     let listOfLeelazMoves = await getProposedMovesFromAnalysisFile(filePath + sgfFile.SgfFileName.substring(0, sgfFile.SgfFileName.length - 4) + '_analyze.txt');
-    // console.log(1, listOfMoves);
-    // console.log(2, listOfLeelazMoves);
-    let analyzedGame = getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves);
-    await AnalyzedGame.update(analyzedGame, { where: { id: analyzedGame.id } });
-    return analyzedGame;
+    let analyzedSGFfile = getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves);
+    await AnalyzedSGFfile.update(analyzedSGFfile, { where: { id: analyzedSGFfile.id } });
+    analyzedSGFfile.AnalyzedGames.forEach(game => {
+        AnalyzedGame.update(game, { where: { AnalyzedSGFfileId: analyzedSGFfile.id, Color: game.Color } });
+    });
+    return analyzedSGFfile;
 };
 
 function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {
@@ -181,38 +190,45 @@ function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {
         }
     }
 
+    let blackLevel = sgfFile.AnalyzedGames.find(g => g.Color == "b") ? sgfFile.AnalyzedGames.find(g => g.Color == "b").Level : undefined;
+    let whiteLevel = sgfFile.AnalyzedGames.find(g => g.Color == "w") ? sgfFile.AnalyzedGames.find(g => g.Color == "w").Level : undefined;
+
     visitsAverage = Math.floor(visitsAverage / countMove);
     let blackMatchRateOfMoves1And2 = ((black1stChoice) / (black1stChoice + black2ndChoice + blackNot12Choice) * 100).toFixed(2);
     let blackTotalAnalyzedMoves = black1stChoice + black2ndChoice + blackNot12Choice;
     let isBlackCheating = false;
-    if ((blackMatchRateOfMoves1And2 > 85 && sgfFile.BlackLevel < 6) || blackMatchRateOfMoves1And2 > (3.324 * sgfFile.BlackLevel + 58.78)) {
+    if ((blackMatchRateOfMoves1And2 > 85 && blackLevel < 6) || blackMatchRateOfMoves1And2 > (3.324 * blackLevel + 58.78)) {
         isBlackCheating = true;
     }
 
     let whiteMatchRateOfMoves1And2 = ((white1stChoice) / (white1stChoice + white2ndChoice + whiteNot12Choice) * 100).toFixed(2);
     let whiteTotalAnalyzedMoves = white1stChoice + white2ndChoice + whiteNot12Choice;
     let isWhiteCheating = false;
-    if ((whiteMatchRateOfMoves1And2 > 85 && sgfFile.WhiteLevel < 6) || whiteMatchRateOfMoves1And2 > (3.324 * sgfFile.WhiteLevel + 58.78)) {
+    if ((whiteMatchRateOfMoves1And2 > 85 && whiteLevel < 6) || whiteMatchRateOfMoves1And2 > (3.324 * whiteLevel + 58.78)) {
         isWhiteCheating = true;
     }
 
+    let b = {
+        "Color": "b",
+        "Level": blackLevel,
+        "1stChoice": black1stChoice,
+        "2ndChoice": black2ndChoice,
+        "TotalAnalyzedMoves": blackTotalAnalyzedMoves,
+        "UnexpectedMoves": blackUnexpectedMoves,
+        "IsCheating": isBlackCheating,
+    }
+    let w = {
+        "Color": "w",
+        "Level": whiteLevel,
+        "1stChoice": white1stChoice,
+        "2ndChoice": white2ndChoice,
+        "TotalAnalyzedMoves": whiteTotalAnalyzedMoves,
+        "UnexpectedMoves": whiteUnexpectedMoves,
+        "IsCheating": isWhiteCheating,
+    }
+
     let analyzedGame = {
-        "BlackLevel": sgfFile.BlackLevel,
-        "Black1stChoice": black1stChoice,
-        "Black2ndChoice": black2ndChoice,
-        "BlackTotalAnalyzedMoves": blackTotalAnalyzedMoves,
-        "BlackUnexpectedMoves": blackUnexpectedMoves,
-        "BlackMatchRateOfMoves1And2": blackMatchRateOfMoves1And2,
-        "IsBlackCheating": isBlackCheating,
-
-        "WhiteLevel": sgfFile.WhiteLevel,
-        "White1stChoice": white1stChoice,
-        "White2ndChoice": white2ndChoice,
-        "WhiteTotalAnalyzedMoves": whiteTotalAnalyzedMoves,
-        "WhiteUnexpectedMoves": whiteUnexpectedMoves,
-        "WhiteMatchRateOfMoves1And2": whiteMatchRateOfMoves1And2,
-        "IsWhiteCheating": isWhiteCheating,
-
+        "AnalyzedGames": [b, w],
         "id": sgfFile.id,
         "SgfFileName": sgfFile.SgfFileName,
         "PlayerUserId": sgfFile.PlayerUserId,

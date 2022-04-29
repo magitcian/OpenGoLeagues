@@ -1,4 +1,4 @@
-//Command : npm start
+//Command : node index.js ou npm start
 const express = require("express");
 const app = express();
 const cors = require("cors");

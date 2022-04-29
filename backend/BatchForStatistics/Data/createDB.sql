@@ -1,25 +1,27 @@
 
-DROP DATABASE IF EXISTS `GoStatistic`;
-CREATE DATABASE IF NOT EXISTS `GoStatistic` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `GoStatistic`;
+DROP DATABASE IF EXISTS `GoStatistics`;
+CREATE DATABASE IF NOT EXISTS `GoStatistics` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `GoStatistics`;
 
-CREATE TABLE `Statistics` (
-    `id` INTEGER PRIMARY KEY AUTOINCREMENT, 
+CREATE TABLE `StatSGFfile` (
+    `Id` INTEGER PRIMARY KEY AUTOINCREMENT, 
     `SgfFileName` VARCHAR(255) NOT NULL, 
     `Path` VARCHAR(255) NOT NULL, 
     `VisitsAverage` INTEGER NOT NULL, 
-    `BlackLevel` VARCHAR(10) NOT NULL, 
-    `Black1stChoice` INTEGER NOT NULL, 
-    `Black2ndChoice` INTEGER NOT NULL, 
-    `BlackTotalAnalyzedMoves` INTEGER NOT NULL, 
-    `BlackUnexpectedMoves` INTEGER NOT NULL, 
-    `BlackMatchRateOfMoves1And2` DOUBLE PRECISION NOT NULL, 
-    `WhiteLevel` VARCHAR(10) NOT NULL, 
-    `White1stChoice` INTEGER NOT NULL, 
-    `White2ndChoice` INTEGER NOT NULL, 
-    `WhiteTotalAnalyzedMoves` INTEGER NOT NULL, 
-    `WhiteUnexpectedMoves` INTEGER NOT NULL, 
-    `WhiteMatchRateOfMoves1And2` DOUBLE PRECISION NOT NULL, 
     `createdAt` DATETIME NOT NULL, 
     `updatedAt` DATETIME NOT NULL
+);
+
+CREATE TABLE `StatGame` (
+    `Id` INTEGER PRIMARY KEY AUTOINCREMENT, 
+    `SGFfileId` INTEGER,
+    `Color` VARCHAR(1) NOT NULL, 
+    `Level` VARCHAR(5) NOT NULL, 
+    `1stChoice` INTEGER NOT NULL, 
+    `2ndChoice` INTEGER NOT NULL, 
+    `TotalAnalyzedMoves` INTEGER NOT NULL, 
+    `UnexpectedMoves` INTEGER NOT NULL, 
+    `createdAt` DATETIME NOT NULL, 
+    `updatedAt` DATETIME NOT NULL,
+	FOREIGN KEY(SGFfileId) REFERENCES SGFfile(Id) ON DELETE CASCADE
 );

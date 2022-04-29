@@ -3,7 +3,7 @@ const router = express.Router();
 const cors = require('cors')
 const multer = require('multer')
 const { validateToken } = require("../middlewares/AuthMiddleware");
-const { User, AnalyzedGame, Level } = require("../models");
+const { User, AnalyzedGame, AnalyzedSGFfile, Level } = require("../models");
 
 let newFileName = "";
 let fileDate;
@@ -51,31 +51,41 @@ router.post('/upload', validateToken, multerUploads, async function (req, res) {
   let isFileFormatCorrect = await correctFileFormat(fileDestination + newFileName);
   if (visits <= 1000 && blackPlayerLevel && whitePlayerLevel && isFileFormatCorrect) {
 
-    let analyzedGame = {
-      "BlackLevel": blackLevel,
-      "Black1stChoice": 0,
-      "Black2ndChoice": 0,
-      "BlackTotalAnalyzedMoves": 0,
-      "BlackUnexpectedMoves": 0,
-      "BlackMatchRateOfMoves1And2": 0,
-      "IsBlackCheating": false,
-
-      "WhiteLevel": whiteLevel,
-      "White1stChoice": 0,
-      "White2ndChoice": 0,
-      "WhiteTotalAnalyzedMoves": 0,
-      "WhiteUnexpectedMoves": 0,
-      "WhiteMatchRateOfMoves1And2": 0,
-      "IsWhiteCheating": false,
-
+    let analyzedSGFfile = {
+      //"id":0,
       "SgfFileName": newFileName,
       "VisitsAverage": visits,
       "PlayerUserId": req.user.id,
       "createdAt": fileDate,
       "Status": 0,
+      "AnalyzedGames": [],
     }
-    analyzedGame = await AnalyzedGame.create(analyzedGame);
-    res.json({ analyzedGame: analyzedGame });
+    let analyzedSGFfileReturn = await AnalyzedSGFfile.create(analyzedSGFfile);
+    analyzedSGFfile.id = analyzedSGFfileReturn.id;
+    let blackGame = {
+      "AnalyzedSGFfileId": analyzedSGFfileReturn.id,
+      "Color": "b",
+      "Level": blackLevel,
+      "1stChoice": 0,
+      "2ndChoice": 0,
+      "TotalAnalyzedMoves": 0,
+      "UnexpectedMoves": 0,
+      "IsCheating": false,
+    };
+    let whiteGame = {
+      "AnalyzedSGFfileId": analyzedSGFfileReturn.id,
+      "Color": "w",
+      "Level": whiteLevel,
+      "1stChoice": 0,
+      "2ndChoice": 0,
+      "TotalAnalyzedMoves": 0,
+      "UnexpectedMoves": 0,
+      "IsCheating": false,
+    };
+    blackGame = await AnalyzedGame.create(blackGame);
+    whiteGame = await AnalyzedGame.create(whiteGame);
+    analyzedSGFfile.AnalyzedGames.push(blackGame, whiteGame);
+    res.json({ AnalyzedSGFfile: analyzedSGFfile });
   } else {
     const fs = require('fs');
     fs.unlinkSync(fileDestination + newFileName); //delete file
@@ -86,7 +96,7 @@ router.post('/upload', validateToken, multerUploads, async function (req, res) {
 const upload = multer({ storage: storage })
 router.post('/download', validateToken, upload.none(), async function (req, res) {
   const { fileId } = req.body;
-  const sgfFile = await AnalyzedGame.findOne({ where: { id: fileId, PlayerUserId: req.user.id } });
+  const sgfFile = await AnalyzedSGFfile.findOne({ where: { id: fileId, PlayerUserId: req.user.id } });
   if (sgfFile) {
     const fs = require('fs')
     const pathFile = __dirname.substring(0, __dirname.length - 11) + "SGFfiles\\" + sgfFile.SgfFileName;
@@ -110,12 +120,17 @@ function formatDate() { //yyyy-mm-dd_hh.mm.ss.ms
 
 router.delete("/delete/:fileId", validateToken, async (req, res) => {
   const FileId = req.params.fileId;
-  const game = await AnalyzedGame.findOne({ where: { id: FileId, PlayerUserId: req.user.id, Status: 1 } });
+  const game = await AnalyzedSGFfile.findOne({ where: { id: FileId, PlayerUserId: req.user.id, Status: 1 } });
   if (game) {
     const fs = require('fs');
     const pathFileSGF = __dirname.substring(0, __dirname.length - 11) + "SGFfiles\\" + game.SgfFileName;
     const pathFileAnalysis = pathFileSGF.substring(0, pathFileSGF.length - 4) + "_analyze.txt";
     await AnalyzedGame.destroy({
+      where: {
+        AnalyzedSGFfileId: FileId,
+      },
+    });
+    await AnalyzedSGFfile.destroy({
       where: {
         id: FileId,
         PlayerUserId: req.user.id
@@ -181,15 +196,15 @@ async function getMovesFromSGFfile(filePath) {
 
   let endOfMainMoves = false;
   let i = 2;
-  while(i < arrayOfMovesStr.length && !endOfMainMoves){
-  //for (let i = 2; i < arrayOfMovesStr.length; ++i) {
+  while (i < arrayOfMovesStr.length && !endOfMainMoves) {
+    //for (let i = 2; i < arrayOfMovesStr.length; ++i) {
     let moveStr = arrayOfMovesStr[i];
     if (moveStr.includes("[") && moveStr.includes("]")) {
 
       //Take into account only the first variations of the game:
       let moveStrWOLF = moveStr.replace(/\n/g, '').replace(/\r/g, '');
-      let markEndOfMainMoves = moveStrWOLF.substring(moveStrWOLF.length-2, moveStrWOLF.length);
-      if(markEndOfMainMoves == ")("){
+      let markEndOfMainMoves = moveStrWOLF.substring(moveStrWOLF.length - 2, moveStrWOLF.length);
+      if (markEndOfMainMoves == ")(") {
         endOfMainMoves = true;
       }
 

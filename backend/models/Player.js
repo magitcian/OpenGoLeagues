@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
         Player.hasMany(models.LevelHistory, {
             onDelete: "CASCADE",
         });
-        Player.hasMany(models.AnalyzedGame, {
+        Player.hasMany(models.AnalyzedSGFfile, {
             onDelete: "CASCADE",
         });
         Player.hasOne(models.KGSdata, {

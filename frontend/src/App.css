@@ -328,3 +328,8 @@ table.playerList td.Registered {
 table.playerList td.Refused {
   color: red;
 }
+
+div.analysisContainer{
+  max-width: 100%; 
+  /* overflow: auto; */
+}

@@ -1,78 +1,40 @@
 module.exports = (sequelize, DataTypes) => {
     const AnalyzedGame = sequelize.define("AnalyzedGame", {
-        SgfFileName: {
+        Color: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        Status: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-        },
-        VisitsAverage: {
+        Level: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        BlackLevel: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
-        Black1stChoice: {
+        "1stChoice": {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        Black2ndChoice: {
+        "2ndChoice": {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        BlackTotalAnalyzedMoves: {
+        TotalAnalyzedMoves: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        BlackUnexpectedMoves: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
-        BlackMatchRateOfMoves1And2: {
+        UnexpectedMoves: {
             type: DataTypes.DOUBLE,
             allowNull: false,
         },
-        IsBlackCheating: {
+        IsCheating: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
         },
 
-        WhiteLevel: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
-        White1stChoice: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
-        White2ndChoice: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
-        WhiteTotalAnalyzedMoves: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
-        WhiteUnexpectedMoves: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
-        WhiteMatchRateOfMoves1And2: {
-            type: DataTypes.DOUBLE,
-            allowNull: false,
-        },
-        IsWhiteCheating: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-        },
     });
 
     AnalyzedGame.associate = (models) => {
-        AnalyzedGame.belongsTo(models.Player);
+        AnalyzedGame.belongsTo(models.AnalyzedSGFfile, {
+            onDelete: "CASCADE",
+        });
     };
 
     return AnalyzedGame;

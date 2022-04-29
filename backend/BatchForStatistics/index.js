@@ -4,11 +4,12 @@ const leelaAnalyzer = require("../controllers/LeelaZero");
 const sgfAnalyzer = require("../controllers/SGFfile");
 const statistics = require("./changeStatistics");
 const fs = require('fs');
+const fsp = require('fs').promises;
 
 let listOfFiles = [];
 
 //let nodePath = prompt('Which folder to analyse ?'); //D:\TempWork\testLeela\parties
-let nodePath = "D:/TempWork/testLeela/parties";
+let nodePath = "D:/TempWork/testLeela/parties/2021"; //"D:/TempWork/testLeela/parties/liusasori-omerkazanc.sgf"; "D:/TempWork/testLeela/parties/2021";
 //statistics.deleteAllData();
 if (fs.existsSync(nodePath)) {
   const path = require('path').dirname(nodePath);
@@ -24,6 +25,7 @@ function getAllFiles(nodePath, nodeName) {
     let file = {
       "Path": nodePath + "/",
       "SgfFileName": nodeName,
+      "AnalyzedGames": [],
     };
     listOfFiles.push(file);
   } else {
@@ -40,6 +42,7 @@ async function launchAnalysisOnFiles() {
   for (const f of listOfFiles) {
     for (i = 0; i < 3; ++i) {
       f.VisitsAverage = listOfAverage[i];
+      //f.VisitsAverage = 100;
       f.ForStatistics = true;
       //console.log(f);
       await analyseSGFfile(f);
@@ -53,17 +56,23 @@ async function analyseSGFfile(f) {
     //rename analysis file with VisitsAverage:
     aFileName = f.Path + f.SgfFileName.substring(0, f.SgfFileName.length - 4) + '_analyze.txt';
     aFileNameNew = f.Path + f.SgfFileName.substring(0, f.SgfFileName.length - 4) + "_" + f.VisitsAverage + '_analyze.txt';
+
     if (!fs.existsSync(aFileNameNew)) {
       await leelaAnalyzer.createAnalysisFileWithLeela(f.Path, f);
-      fs.rename(aFileName, aFileNameNew, function (err) {
+      await fsp.rename(aFileName, aFileNameNew, function (err) {
         if (err) console.log('ERROR: ' + err);
       });
       let listOfMoves = await sgfAnalyzer.getMovesFromSGFfile(f.Path + f.SgfFileName);
       let listOfLeelazMoves = await leelaAnalyzer.getProposedMovesFromAnalysisFile(aFileNameNew);
       let statGame = leelaAnalyzer.getAnalyzedGame(f, listOfMoves, listOfLeelazMoves);
       statGame.Path = f.Path;
-      statGame.BlackLevel = levels.black;
-      statGame.WhiteLevel = levels.white;
+      statGame.AnalyzedGames.forEach(game => {
+        if (game.Color == "b") {
+          game.Level = levels.black;
+        } else {
+          game.Level = levels.white;
+        }
+      })
       statistics.addData(statGame);
     }
   } else {
@@ -89,7 +98,6 @@ async function getLevelsFromSGFfile(f) {
 }
 
 async function loadFileContent(filePath) {
-  const fs = require('fs').promises;
-  const data = await fs.readFile(filePath, "binary");
+  const data = await fsp.readFile(filePath, "binary");
   return new Buffer.from(data);
 }

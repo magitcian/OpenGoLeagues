@@ -1,18 +1,24 @@
 const express = require("express");
 const router = express.Router();
-const { AnalyzedGame } = require("../models");
+const { AnalyzedSGFfile, AnalyzedGame } = require("../models");
 const { validateToken } = require("../middlewares/AuthMiddleware");
 
 
 router.get("/my-analyzed-games", validateToken, async (req, res) => {
-    const listOfAnalyzedGame = await AnalyzedGame.findAll({
+    const listOfAnalyzedSGFfile = await AnalyzedSGFfile.findAll({
         where: { PlayerUserId: req.user.id },
+        include: [{
+            model: AnalyzedGame,
+            order: [
+                ['Color', 'ASC'],
+            ],
+        }],
         order: [
             ['createdAt', 'DESC'],
             // ['id', 'ASC'],
         ],
     });
-    res.json({ listOfAnalyzedGame: listOfAnalyzedGame });
+    res.json({ listOfAnalyzedSGFfile: listOfAnalyzedSGFfile });
 });
 
 

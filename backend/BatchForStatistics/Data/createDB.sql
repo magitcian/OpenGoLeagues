@@ -8,6 +8,8 @@ CREATE TABLE `StatSGFfile` (
     `SgfFileName` VARCHAR(255) NOT NULL, 
     `Path` VARCHAR(255) NOT NULL, 
     `VisitsAverage` INTEGER NOT NULL, 
+    `TM` VARCHAR(255) NOT NULL, 
+    `OT` VARCHAR(255) NOT NULL, 
     `createdAt` DATETIME NOT NULL, 
     `updatedAt` DATETIME NOT NULL
 );
@@ -25,3 +27,8 @@ CREATE TABLE `StatGame` (
     `updatedAt` DATETIME NOT NULL,
 	FOREIGN KEY(SGFfileId) REFERENCES SGFfile(Id) ON DELETE CASCADE
 );
+
+
+-- SELECT * 
+-- FROM StatSGFfile sgf
+-- LEFT JOIN StatGame game ON game.SGFfileId = sgf.Id

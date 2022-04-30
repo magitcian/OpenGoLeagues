@@ -6,11 +6,11 @@ const statistics = require("./changeStatistics");
 const fs = require('fs');
 const fsp = require('fs').promises;
 
-let listOfFiles = [];
+//deleteAllStatisticalData();
 
+let listOfFiles = [];
 //let nodePath = prompt('Which folder to analyse ?'); //D:\TempWork\testLeela\parties
 let nodePath = "D:/TempWork/testLeela/parties/2021"; //"D:/TempWork/testLeela/parties/liusasori-omerkazanc.sgf"; "D:/TempWork/testLeela/parties/2021";
-//statistics.deleteAllData();
 if (fs.existsSync(nodePath)) {
   const path = require('path').dirname(nodePath);
   const nodeName = nodePath.substring(path.length + 1);
@@ -26,6 +26,8 @@ function getAllFiles(nodePath, nodeName) {
       "Path": nodePath + "/",
       "SgfFileName": nodeName,
       "AnalyzedGames": [],
+      "TM": "",
+      "OT": "",
     };
     listOfFiles.push(file);
   } else {
@@ -51,8 +53,10 @@ async function launchAnalysisOnFiles() {
 }
 
 async function analyseSGFfile(f) {
-  let levels = await getLevelsFromSGFfile(f);
-  if (levels) {
+  let game = await sgfAnalyzer.getGameInfoFromSGFfile(f.Path + f.SgfFileName);
+  //console.log(game);
+  //let levels = await getLevelsFromSGFfile(f);
+  if (game.BR && game.WR) {
     //rename analysis file with VisitsAverage:
     aFileName = f.Path + f.SgfFileName.substring(0, f.SgfFileName.length - 4) + '_analyze.txt';
     aFileNameNew = f.Path + f.SgfFileName.substring(0, f.SgfFileName.length - 4) + "_" + f.VisitsAverage + '_analyze.txt';
@@ -62,15 +66,17 @@ async function analyseSGFfile(f) {
       await fsp.rename(aFileName, aFileNameNew, function (err) {
         if (err) console.log('ERROR: ' + err);
       });
-      let listOfMoves = await sgfAnalyzer.getMovesFromSGFfile(f.Path + f.SgfFileName);
+      
       let listOfLeelazMoves = await leelaAnalyzer.getProposedMovesFromAnalysisFile(aFileNameNew);
-      let statGame = leelaAnalyzer.getAnalyzedGame(f, listOfMoves, listOfLeelazMoves);
+      let statGame = leelaAnalyzer.getAnalyzedGame(f, game.Moves, listOfLeelazMoves);
+      statGame.TM = game.TM;
+      statGame.OT = game.OT;
       statGame.Path = f.Path;
-      statGame.AnalyzedGames.forEach(game => {
-        if (game.Color == "b") {
-          game.Level = levels.black;
+      statGame.AnalyzedGames.forEach(moves => {
+        if (moves.Color == "b") {
+          moves.Level = game.BR;
         } else {
-          game.Level = levels.white;
+          moves.Level = game.WR;
         }
       })
       statistics.addData(statGame);
@@ -80,21 +86,8 @@ async function analyseSGFfile(f) {
   }
 }
 
-async function getLevelsFromSGFfile(f) {
-  let containtBin = await loadFileContent(f.Path + f.SgfFileName);
-  let containtStr = containtBin.toString();
-  let arrayOfinfo = containtStr.split(";");
-  if (arrayOfinfo && arrayOfinfo[1] && arrayOfinfo[1].includes("BR[") && arrayOfinfo[1].includes("WR[")) {
-    let br = arrayOfinfo[1].split("BR[");
-    let wr = arrayOfinfo[1].split("WR[");
-    let levels = {
-      "black": br[1].split("]")[0].toString(),
-      "white": wr[1].split("]")[0].toString(),
-    }
-    return levels;
-  } else {
-    return undefined;
-  }
+function deleteAllStatisticalData() {
+  statistics.deleteAllData();
 }
 
 async function loadFileContent(filePath) {

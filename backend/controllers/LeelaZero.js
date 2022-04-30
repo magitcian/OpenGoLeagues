@@ -194,17 +194,17 @@ function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {
     let whiteLevel = sgfFile.AnalyzedGames.find(g => g.Color == "w") ? sgfFile.AnalyzedGames.find(g => g.Color == "w").Level : undefined;
 
     visitsAverage = Math.floor(visitsAverage / countMove);
-    let blackMatchRateOfMoves1And2 = ((black1stChoice) / (black1stChoice + black2ndChoice + blackNot12Choice) * 100).toFixed(2);
+    let blackMatchRateOfMoves1 = ((black1stChoice) / (black1stChoice + black2ndChoice + blackNot12Choice) * 100).toFixed(2);
     let blackTotalAnalyzedMoves = black1stChoice + black2ndChoice + blackNot12Choice;
     let isBlackCheating = false;
-    if ((blackMatchRateOfMoves1And2 > 85 && blackLevel < 6) || blackMatchRateOfMoves1And2 > (3.324 * blackLevel + 58.78)) {
+    if ((blackMatchRateOfMoves1 > 85 && blackLevel < 6) || blackMatchRateOfMoves1 > (3.324 * blackLevel + 58.78)) {
         isBlackCheating = true;
     }
 
-    let whiteMatchRateOfMoves1And2 = ((white1stChoice) / (white1stChoice + white2ndChoice + whiteNot12Choice) * 100).toFixed(2);
+    let whiteMatchRateOfMoves1 = ((white1stChoice) / (white1stChoice + white2ndChoice + whiteNot12Choice) * 100).toFixed(2);
     let whiteTotalAnalyzedMoves = white1stChoice + white2ndChoice + whiteNot12Choice;
     let isWhiteCheating = false;
-    if ((whiteMatchRateOfMoves1And2 > 85 && whiteLevel < 6) || whiteMatchRateOfMoves1And2 > (3.324 * whiteLevel + 58.78)) {
+    if ((whiteMatchRateOfMoves1 > 85 && whiteLevel < 6) || whiteMatchRateOfMoves1 > (3.324 * whiteLevel + 58.78)) {
         isWhiteCheating = true;
     }
 
@@ -227,7 +227,7 @@ function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {
         "IsCheating": isWhiteCheating,
     }
 
-    let analyzedGame = {
+    let analyzedSGFfile = {
         "AnalyzedGames": [b, w],
         "id": sgfFile.id,
         "SgfFileName": sgfFile.SgfFileName,
@@ -236,7 +236,7 @@ function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {
         "VisitsAverage": visitsAverage,
     }
     //console.log(analyzedGame);
-    return analyzedGame;
+    return analyzedSGFfile;
 }
 
 async function getProposedMovesFromAnalysisFile(analysisFilePath) {

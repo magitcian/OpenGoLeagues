@@ -57,8 +57,8 @@ async function addData(stat) {
 
 function insertSGFfile(stat) {
     return new Promise(async (resolve, reject) => {
-        let sqlSGF = "INSERT INTO StatSGFfile(SgfFileName, Path, VisitsAverage, createdAt, updatedAt) VALUES ";
-        sqlSGF += "( '" + stat.SgfFileName + "', '" + stat.Path + "', '" + stat.VisitsAverage + "','" + dataDate + "', '" + dataDate + "');";
+        let sqlSGF = "INSERT INTO StatSGFfile(SgfFileName, Path, VisitsAverage, TM, OT, createdAt, updatedAt) VALUES ";
+        sqlSGF += "( '" + stat.SgfFileName + "', '" + stat.Path + "', '" + stat.VisitsAverage + "', '" + stat.TM + "', '" + stat.OT + "', '" + dataDate + "', '" + dataDate + "');";
         console.log(sqlSGF);
         db.run(sqlSGF, function (err) {
             if (err) {

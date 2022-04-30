@@ -162,6 +162,42 @@ async function correctFileFormat(filePath) {
   }
 }
 
+async function getGameInfoFromSGFfile(filePath) {
+  let movesBin = await loadFileContent(filePath);
+  let movesStr = movesBin.toString();
+  let arrayOfGameInfoStr = movesStr.split(";");
+
+  let game = {
+    "TM": getGameInfoFromSGFfileSettings(arrayOfGameInfoStr[1], "TM"), //Main time
+    "OT": getGameInfoFromSGFfileSettings(arrayOfGameInfoStr[1], "OT"), //Time after main time
+    "BR": getGameInfoFromSGFfileSettings(arrayOfGameInfoStr[1], "BR"), //black rank
+    "WR": getGameInfoFromSGFfileSettings(arrayOfGameInfoStr[1], "WR"), //white rank
+    "Moves": await getMovesFromSGFfile(filePath), //List of moves
+  }
+  return game;
+}
+
+function getGameInfoFromSGFfileSettings(settingsStr, soughtSetting) {
+  try {
+    return settingsStr.split(soughtSetting + "[")[1].split("]")[0];
+  } catch {
+    return undefined;
+  }
+}
+
+async function getLevelsFromSGFfile(filePath) {
+  let containtBin = await loadFileContent(f.Path + f.SgfFileName);
+  let containtStr = containtBin.toString();
+  let arrayOfGameInfoStr = containtStr.split(";");
+
+  let levels = {
+    "black": getGameInfoFromSGFfileSettings(arrayOfGameInfoStr[1], "BR"),
+    "white": getGameInfoFromSGFfileSettings(arrayOfGameInfoStr[1], "WR"),
+  }
+  return levels;
+
+}
+
 async function getMovesFromSGFfile(filePath) {
   let arrayOfMovesObj = new Array();
   const alphaNormal = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's'];
@@ -169,11 +205,11 @@ async function getMovesFromSGFfile(filePath) {
 
   let movesBin = await loadFileContent(filePath);
   let movesStr = movesBin.toString();
-  let arrayOfMovesStr = movesStr.split(";");
+  let arrayOfGameInfoStr = movesStr.split(";");
 
   //To add handicap stones:
-  // console.log(arrayOfMovesStr);
-  // let AB = arrayOfMovesStr[1].split("AB[");
+  // console.log(arrayOfGameInfoStr);
+  // let AB = arrayOfGameInfoStr[1].split("AB[");
   // let handStones = AB[1].split("[");
   // handStones.forEach(hs => {
   //   console.log(hs);
@@ -196,9 +232,9 @@ async function getMovesFromSGFfile(filePath) {
 
   let endOfMainMoves = false;
   let i = 2;
-  while (i < arrayOfMovesStr.length && !endOfMainMoves) {
-    //for (let i = 2; i < arrayOfMovesStr.length; ++i) {
-    let moveStr = arrayOfMovesStr[i];
+  while (i < arrayOfGameInfoStr.length && !endOfMainMoves) {
+    //for (let i = 2; i < arrayOfGameInfoStr.length; ++i) {
+    let moveStr = arrayOfGameInfoStr[i];
     if (moveStr.includes("[") && moveStr.includes("]")) {
 
       //Take into account only the first variations of the game:
@@ -248,4 +284,5 @@ async function loadFileContent(filePath) {
 module.exports = {
   router: router,
   getMovesFromSGFfile: getMovesFromSGFfile,
+  getGameInfoFromSGFfile: getGameInfoFromSGFfile,
 }

@@ -65,7 +65,7 @@ function PlayerList(leagueId) {
     }
 
     return (
-        <div >
+        <div className='Container'>
             <table className='playerList'>
                 <thead>
                     <tr>

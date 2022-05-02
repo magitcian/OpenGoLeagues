@@ -333,3 +333,8 @@ div.analysisContainer{
   max-width: 100%; 
   /* overflow: auto; */
 }
+
+div.Container{
+  max-width: 100%; 
+  /* overflow: auto;  */
+}

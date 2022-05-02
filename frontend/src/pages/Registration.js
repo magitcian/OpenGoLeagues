@@ -63,7 +63,7 @@ function Registration() {
   };
 
   return (
-    <div>
+    <div className="Container">
       <Formik
         initialValues={initialValues}
         onSubmit={onSubmit}

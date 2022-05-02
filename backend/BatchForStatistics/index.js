@@ -54,8 +54,6 @@ async function launchAnalysisOnFiles() {
 
 async function analyseSGFfile(f) {
   let game = await sgfAnalyzer.getGameInfoFromSGFfile(f.Path + f.SgfFileName);
-  //console.log(game);
-  //let levels = await getLevelsFromSGFfile(f);
   if (game.BR && game.WR) {
     //rename analysis file with VisitsAverage:
     aFileName = f.Path + f.SgfFileName.substring(0, f.SgfFileName.length - 4) + '_analyze.txt';
@@ -66,7 +64,6 @@ async function analyseSGFfile(f) {
       await fsp.rename(aFileName, aFileNameNew, function (err) {
         if (err) console.log('ERROR: ' + err);
       });
-      
       let listOfLeelazMoves = await leelaAnalyzer.getProposedMovesFromAnalysisFile(aFileNameNew);
       let statGame = leelaAnalyzer.getAnalyzedGame(f, game.Moves, listOfLeelazMoves);
       statGame.TM = game.TM;
@@ -81,6 +78,7 @@ async function analyseSGFfile(f) {
       })
       statistics.addData(statGame);
     }
+
   } else {
     console.log("No level found in file!")
   }
@@ -90,7 +88,3 @@ function deleteAllStatisticalData() {
   statistics.deleteAllData();
 }
 
-async function loadFileContent(filePath) {
-  const data = await fsp.readFile(filePath, "binary");
-  return new Buffer.from(data);
-}

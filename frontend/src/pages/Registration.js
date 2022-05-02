@@ -75,7 +75,7 @@ function Registration() {
           <Form className="formContainer">
 
             <label>Firstname: </label>
-            <ErrorMessage name="firstName" component="span" />
+            <ErrorMessage name="firstName" component="span" className='error'/>
             <Field
               autoComplete="off"
               className="inputCreatePost"
@@ -84,7 +84,7 @@ function Registration() {
             />
 
             <label>Lastname: </label>
-            <ErrorMessage name="lastName" component="span" />
+            <ErrorMessage name="lastName" component="span" className='error'/>
             <Field
               autoComplete="off"
               className="inputCreatePost"
@@ -93,7 +93,7 @@ function Registration() {
             />
 
             <label>Email: </label>
-            <ErrorMessage name="email" component="span" />
+            <ErrorMessage name="email" component="span" className='error'/>
             <Field
               autoComplete="off"
               className="inputCreatePost"
@@ -102,7 +102,7 @@ function Registration() {
             />
 
             <label>Password: </label>
-            <ErrorMessage name="password" component="span" />
+            <ErrorMessage name="password" component="span" className='error'/>
             <Field
               autoComplete="off"
               type="password"
@@ -112,7 +112,7 @@ function Registration() {
             />
 
             <label>Rewrite password: </label>
-            <ErrorMessage name="passwordConfirmation" component="span" />
+            <ErrorMessage name="passwordConfirmation" component="span" className='error'/>
             <Field
               autoComplete="off"
               type="password"
@@ -122,7 +122,7 @@ function Registration() {
             />
 
             <label>Your level: </label>
-            <ErrorMessage name="level" component="span" />
+            <ErrorMessage name="level" component="span" className='error'/>
             <Select name="level" options={options} onChange={(e) => { level = e.value; setFieldValue("level", e.value) }} />
 
             <button type="submit"> Register</button>

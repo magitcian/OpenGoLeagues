@@ -244,7 +244,19 @@ async function getMovesFromSGFfile(filePath) {
         endOfMainMoves = true;
       }
 
-      let positionFile = moveStr.substring(2, 4).includes("]") ? "pass" : moveStr.substring(2, 4);
+      let positionFile = "pass";
+      let moveStrB = getGameInfoFromSGFfileSettings(moveStr, "B");
+      let moveStrW = getGameInfoFromSGFfileSettings(moveStr, "W");
+      let moveStrL = getGameInfoFromSGFfileSettings(moveStr, "BL");
+      let colorShort = moveStr.includes("W[") ? "W" : "B";
+      if (moveStrB) {
+        positionFile = moveStrB.length > 1 ? moveStrB : "pass";
+        moveStrL = getGameInfoFromSGFfileSettings(moveStr, "BL");
+      } else if (moveStrW) {
+        positionFile = moveStrW.length > 1 ? moveStrW : "pass";
+        moveStrL = getGameInfoFromSGFfileSettings(moveStr, "WL");
+      }
+
       let posLeela1 = "pass"
       let posLeela2 = 0;
       if (positionFile != "pass") {
@@ -254,13 +266,13 @@ async function getMovesFromSGFfile(filePath) {
       //posLeela1 = String.fromCharCode(positionFile.charAt(0).charCodeAt(0)+1);
       let moveObj =
       {
-        "colorShort": moveStr.substring(0, 1),
-        "colorLong": moveStr.substring(0, 1) == "W" ? "white" : "black",
+        "colorShort": colorShort,
+        "colorLong": colorShort == "W" ? "white" : "black",
         "positionFile": positionFile,
         "posLeela1": posLeela1,
         "posLeela2": posLeela2,
         "posLeela": posLeela1 == "pass" ? posLeela1 : posLeela1 + posLeela2,
-        "time": moveStr.substring(8, 10),
+        "time": moveStrL,
         "handicapStone": false,
       }
       //console.log(moveObj);

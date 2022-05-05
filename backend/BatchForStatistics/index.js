@@ -64,6 +64,7 @@ async function analyseSGFfile(f) {
       await fsp.rename(aFileName, aFileNameNew, function (err) {
         if (err) console.log('ERROR: ' + err);
       });
+
       let listOfLeelazMoves = await leelaAnalyzer.getProposedMovesFromAnalysisFile(aFileNameNew);
       let statGame = leelaAnalyzer.getAnalyzedGame(f, game.Moves, listOfLeelazMoves);
       statGame.TM = game.TM;
@@ -76,9 +77,9 @@ async function analyseSGFfile(f) {
           moves.Level = game.WR;
         }
       })
-      statistics.addData(statGame);
-    }
+      await statistics.addData(statGame);
 
+    }
   } else {
     console.log("No level found in file!")
   }

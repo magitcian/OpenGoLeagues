@@ -10,24 +10,34 @@ function getDate() { //yyyy-mm-dd hh:mm:ss
 }
 
 function openDB() {
-    db = new sqlite3.Database('./Data/GoStatistics.db', (err) => {
-        if (err) {
-            console.error(err.message);
-        }
-    });
+    return new Promise(async (resolve, reject) => {
+        db = new sqlite3.Database('./Data/GoStatistics.db', (err) => {
+            if (err) {
+                console.error(err.message);
+                reject("FAILURE");
+            }
+            console.log(`Rows Statistic inserted ${this.changes}`);
+            resolve("SUCCESS");
+        });
+    })
 }
 
 function closeDB() {
-    db.close((err) => {
-        if (err) {
-            return console.error(err.message);
-        }
-    });
+    return new Promise(async (resolve, reject) => {
+        db.close((err) => {
+            if (err) {
+                console.error(err.message);
+                reject("FAILURE");
+            }
+            console.log(`Rows Statistic inserted ${this.changes}`);
+            resolve("SUCCESS");
+        });
+    })
 }
 
-function deleteAllData() {
+async function deleteAllData() {
 
-    openDB();
+    await openDB();
 
     db.run(`DELETE FROM StatGame`, function (err) {
         if (err) {
@@ -43,16 +53,16 @@ function deleteAllData() {
         console.log(`Row(s) StatSGFfile deleted ${this.changes}`);
     });
 
-    closeDB();
+    await closeDB();
 }
 
 async function addData(stat) {
     dataDate = getDate();
-    openDB();
+    await openDB();
     await insertSGFfile(stat);
     stat.SGFfileId = await getSGFfileId(stat);
     await insertStatGames(stat);
-    closeDB();
+    await closeDB();
 }
 
 function insertSGFfile(stat) {
@@ -90,9 +100,9 @@ function insertStatGames(stat) {
         stat.AnalyzedGames.forEach(game => {
             sqlGame += "( " + stat.SGFfileId + ", '" + game.Color + "', '" + game.Level + "', '" + game["1stChoice"] + "', '" + game["2ndChoice"] + "', '" + game.TotalAnalyzedMoves + "', '" + game.UnexpectedMoves + "', '" + dataDate + "', '" + dataDate + "'),";
         })
-        sqlGame = sqlGame.substring(0, sqlGame.length-1) + ";";
+        sqlGame = sqlGame.substring(0, sqlGame.length - 1) + ";";
         console.log(sqlGame);
-        
+
         db.run(sqlGame, function (err) {
             if (err) {
                 console.error(err.message);

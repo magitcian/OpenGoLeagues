@@ -52,7 +52,7 @@ function createAnalysisFileWithLeela(filePath, sgfFile) {
 
         const { spawn } = require('child_process');
         let leelaz = getLeelazPathAccordingToOS(sgfFile);
-        const bat = spawn(leelaz.path, ['-w', leelaz.networkPath, '-g', '--lagbuffer', '0']);
+        const bat = spawn(leelaz.path, ['-g', '-w', leelaz.networkPath ]);
 
         const fs = require('fs');
         let rep_analyze = "";

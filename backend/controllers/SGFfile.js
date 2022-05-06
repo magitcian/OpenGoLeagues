@@ -181,7 +181,7 @@ function getGameInfoFromSGFfileSettings(settingsStr, soughtSetting) {
   try {
     return settingsStr.split(soughtSetting + "[")[1].split("]")[0];
   } catch {
-    return undefined;
+    return "";
   }
 }
 
@@ -244,17 +244,22 @@ async function getMovesFromSGFfile(filePath) {
         endOfMainMoves = true;
       }
 
-      let positionFile = "pass";
-      let moveStrB = getGameInfoFromSGFfileSettings(moveStr, "B");
-      let moveStrW = getGameInfoFromSGFfileSettings(moveStr, "W");
-      let moveStrL = getGameInfoFromSGFfileSettings(moveStr, "BL");
-      let colorShort = moveStr.includes("W[") ? "W" : "B";
-      if (moveStrB) {
-        positionFile = moveStrB.length > 1 ? moveStrB : "pass";
-        moveStrL = getGameInfoFromSGFfileSettings(moveStr, "BL");
-      } else if (moveStrW) {
-        positionFile = moveStrW.length > 1 ? moveStrW : "pass";
-        moveStrL = getGameInfoFromSGFfileSettings(moveStr, "WL");
+
+      let colorShort = moveStr.includes("W[") ? "W" : moveStr.includes("B[") ? "B" : "none";
+      let positionFile = "";
+      let moveStrC = "";
+      let moveStrT = "";
+      let moveStrOT = "";
+      if(colorShort == "B"){
+        moveStrC = getGameInfoFromSGFfileSettings(moveStr, "B");
+        positionFile = moveStrC.length > 1 ? moveStrC : "pass";
+        moveStrT = getGameInfoFromSGFfileSettings(moveStr, "BL");
+        moveStrOT = getGameInfoFromSGFfileSettings(moveStr, "OB");
+      }else if(colorShort == "W"){
+        moveStrC = getGameInfoFromSGFfileSettings(moveStr, "W");
+        positionFile = moveStrC.length > 1 ? moveStrC : "pass";
+        moveStrT = getGameInfoFromSGFfileSettings(moveStr, "WL");
+        moveStrOT = getGameInfoFromSGFfileSettings(moveStr, "OW");
       }
 
       let posLeela1 = "pass"
@@ -272,11 +277,14 @@ async function getMovesFromSGFfile(filePath) {
         "posLeela1": posLeela1,
         "posLeela2": posLeela2,
         "posLeela": posLeela1 == "pass" ? posLeela1 : posLeela1 + posLeela2,
-        "time": moveStrL,
+        "time": moveStrT,
+        "other_Time": moveStrOT,
         "handicapStone": false,
+        "description": moveStr,
       }
-      //console.log(moveObj);
+
       if ((moveObj.colorShort === "W" || moveObj.colorShort === "B") && moveObj.posLeela1 !== undefined) {
+        //console.log(moveObj)
         arrayOfMovesObj.push(moveObj);
       }
     }

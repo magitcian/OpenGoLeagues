@@ -5,23 +5,29 @@ const sgfAnalyzer = require("../controllers/SGFfile");
 const statistics = require("./changeStatistics");
 const fs = require('fs');
 const fsp = require('fs').promises;
+let listOfFiles = [];
+
 
 //deleteAllStatisticalData();
+launch();
 
-let listOfFiles = [];
-//let nodePath = prompt('Which folder to analyse ?'); //D:\TempWork\testLeela\parties
-let nodePath = "D:/TempWork/testLeela/parties/2021"; //"D:/TempWork/testLeela/parties/liusasori-omerkazanc.sgf"; "D:/TempWork/testLeela/parties/2021";
-if (fs.existsSync(nodePath)) {
-  const path = require('path').dirname(nodePath);
-  const nodeName = nodePath.substring(path.length + 1);
-  getAllFiles(path, nodeName);
-  launchAnalysisOnFiles();
+async function launch() {
+  //let nodePath = prompt('Which folder to analyse ?'); //D:\TempWork\testLeela\parties
+  let nodePath = "D:/TempWork/testLeela/parties/batch_1_kgs_kyu_long_games"; //"D:/TempWork/testLeela/parties/liusasori-omerkazanc.sgf"; "D:/TempWork/testLeela/parties/2021";
+  if (fs.existsSync(nodePath)) {
+    const path = require('path').dirname(nodePath);
+    const nodeName = nodePath.substring(path.length + 1);
+    await getAllFiles(path, nodeName);
+    launchAnalysisOnFiles();
+  }
 }
 
-function getAllFiles(nodePath, nodeName) {
+async function getAllFiles(nodePath, nodeName) {
   let node = nodePath + "/" + nodeName;
   //console.log(node);
   if (fs.lstatSync(node).isFile()) {
+    nodeName = await removeBlanksInFileName(nodePath, nodeName);
+    console.log(nodeName);
     let file = {
       "Path": nodePath + "/",
       "SgfFileName": nodeName,
@@ -50,6 +56,17 @@ async function launchAnalysisOnFiles() {
       await analyseSGFfile(f);
     }
   }
+}
+
+async function removeBlanksInFileName(filePath, fileName) {
+  if (fileName.includes(" ")) {
+    let fileNameWithoutBlank = fileName.replace(/\s/g, '');
+    await fsp.rename(filePath + "/" + fileName, filePath + "/" + fileNameWithoutBlank, function (err) {
+      if (err) console.log('ERROR: ' + err);
+    });
+    return fileNameWithoutBlank;
+  }
+  return fileName;
 }
 
 async function analyseSGFfile(f) {

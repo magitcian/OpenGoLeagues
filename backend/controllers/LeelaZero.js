@@ -52,7 +52,7 @@ function createAnalysisFileWithLeela(filePath, sgfFile) {
 
         const { spawn } = require('child_process');
         let leelaz = getLeelazPathAccordingToOS(sgfFile);
-        const bat = spawn(leelaz.path, ['-g', '-w', leelaz.networkPath ]);
+        const bat = spawn(leelaz.path, ['--gtp', '--weights', leelaz.networkPath, '--visits', sgfFile.VisitsAverage ]);
 
         const fs = require('fs');
         let rep_analyze = "";
@@ -98,9 +98,9 @@ function createAnalysisFileWithLeela(filePath, sgfFile) {
         });
 
         bat.stdin.write(1 + " loadsgf " + filePath + sgfFile.SgfFileName + "\n");
-        if (OStype == "w") {
-            bat.stdin.write(2 + " lz-setoption name visits value " + sgfFile.VisitsAverage + "\n");
-        }
+        // if (OStype == "w") {
+        //     bat.stdin.write(2 + " lz-setoption name visits value " + sgfFile.VisitsAverage + "\n");
+        // }
         await sleep(sleep10S);
 
         let listOfMoves = await sgfFileController.getMovesFromSGFfile(filePath + sgfFile.SgfFileName);

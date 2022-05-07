@@ -7,3 +7,5 @@ autogtp defaults to 1 core only.
 
 With the option -k <subdirectory-name> the games can be saved in a 
 subdirectory.
+
+Command to manually launch Leelaz on this project: Leelaz -w ../../networks/best-network

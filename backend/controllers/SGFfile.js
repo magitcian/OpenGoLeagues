@@ -99,7 +99,7 @@ router.post('/download', validateToken, upload.none(), async function (req, res)
   const sgfFile = await AnalyzedSGFfile.findOne({ where: { id: fileId, PlayerUserId: req.user.id } });
   if (sgfFile) {
     const fs = require('fs')
-    const pathFile = __dirname.substring(0, __dirname.length - 11) + "SGFfiles\\" + sgfFile.SgfFileName;
+    const pathFile = __dirname.substring(0, __dirname.length - 11) + "SGFfiles/" + sgfFile.SgfFileName;
     if (fs.existsSync(pathFile)) {
       res.append('fileName', sgfFile.SgfFileName);
       res.status(200).sendFile(pathFile);

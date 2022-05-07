@@ -247,7 +247,11 @@ async function getProposedMovesFromAnalysisFile(analysisFilePath) {
 
     for (let i = arrayOfAnalysisStr.length - 1; i > 0; --i) {
         let listOfProposedMoves = new Array();
-        let AnalysisStr = arrayOfAnalysisStr[i].split("\r\n"); // "\n" : sur linux
+        let endOfFile = "\n";
+        if (OStype == "w") {
+            endOfFile = "\r" + endOfFile;
+        }
+        let AnalysisStr = arrayOfAnalysisStr[i].split(endOfFile);
 
         let visits = 0;
         if (AnalysisStr[AnalysisStr.length - 3].includes("visits")) {

@@ -29,10 +29,10 @@ router.post('/analyzed', validateToken, async function (req, res) {
 })
 
 function getLeelazPathAccordingToOS(sgfFile) {
-    let leelazPath = '../leelaZero/linux/leela-zero/build/leelaz'; //linux
-    let networkPath = '../leelaZero/networks/best-network';
+    let leelazPath = 'leelaZero/linux/leela-zero/build/leelaz'; //linux
+    let networkPath = 'leelaZero/networks/best-network';
     if (OStype == "w") {
-        leelazPath = '../leelaZero/win/leela-zero-0.17-win64/leelaz.exe'; //windows
+        leelazPath = 'leelaZero/win/leela-zero-0.17-win64/leelaz.exe'; //windows
     }
     if (sgfFile.ForStatistics) {
         leelazPath = '../' + leelazPath;

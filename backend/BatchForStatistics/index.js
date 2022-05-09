@@ -13,7 +13,7 @@ launch();
 
 async function launch() {
   //let nodePath = prompt('Which folder to analyse ?'); //D:\TempWork\testLeela\parties
-  let nodePath = "D:/TempWork/testLeela/parties/batch_1_kgs_kyu_long_games"; //"D:/TempWork/testLeela/parties/liusasori-omerkazanc.sgf"; "D:/TempWork/testLeela/parties/2021";
+  let nodePath = "D:/TempWork/testLeela/parties/batch_1_kgs_dan_long_games"; //"D:/TempWork/testLeela/parties/liusasori-omerkazanc.sgf"; "D:/TempWork/testLeela/parties/2021";
   if (fs.existsSync(nodePath)) {
     const path = require('path').dirname(nodePath);
     const nodeName = nodePath.substring(path.length + 1);
@@ -46,15 +46,18 @@ async function getAllFiles(nodePath, nodeName) {
 }
 
 async function launchAnalysisOnFiles() {
-  listOfAverage = [100, 500, 1000];
+  //let listOfAverage = [100, 500, 1000];
   for (const f of listOfFiles) {
-    for (i = 0; i < 3; ++i) {
-      f.VisitsAverage = listOfAverage[i];
-      //f.VisitsAverage = 100;
-      f.ForStatistics = true;
-      //console.log(f);
-      await analyseSGFfile(f);
-    }
+    // for (i = 0; i < 3; ++i) {
+    //   f.VisitsAverage = listOfAverage[i];
+    //   //f.VisitsAverage = 100;
+    //   f.ForStatistics = true;
+    //   //console.log(f);
+    //   await analyseSGFfile(f);
+    // }
+    f.ForStatistics = true;
+    f.VisitsAverage = 1000;
+    await analyseSGFfile(f);
   }
 }
 

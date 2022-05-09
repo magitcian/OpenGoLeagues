@@ -70,17 +70,17 @@ async function addDataInDB() {
   let idLevel = 0;
   levels.forEach(async (l) => {
     ++idLevel;
-    let levelNumber = 0;
+    let levelValue = 0;
     if (l.includes("k")) {
-      levelNumber = parseInt("-" + l.replace("k", ""));
+      levelValue = parseInt("-" + l.replace("k", ""));
     } else {
-      levelNumber = parseInt(l.replace("d", "")) -1;
+      levelValue = parseInt(l.replace("d", "")) -1;
     }
     let level =
     {
       "id": idLevel,
       "level": l,
-      "levelNumber": levelNumber,
+      "value": levelValue,
     }
     //console.log(level);
     await Level.create(level);

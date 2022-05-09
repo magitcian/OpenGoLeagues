@@ -8,11 +8,11 @@ const { User, AnalyzedGame, AnalyzedSGFfile, Level } = require("../models");
 let newFileName = "";
 let fileDate;
 let originalFileName = "";
-let fileDestination = "./SGFfiles/";
+let fileDestination = "SGFfiles/";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, fileDestination)
+    cb(null, "./" + fileDestination)
   },
   filename: (req, file, cb) => {
     originalFileName = file.originalname.replace(/\s/g, '');
@@ -46,9 +46,9 @@ const multerUploads = multer({
 
 router.post('/upload', validateToken, multerUploads, async function (req, res) {
   const { blackLevel, whiteLevel, visits } = req.body;
-  const blackPlayerLevel = await Level.findOne({ where: { levelNumber: blackLevel } });
-  const whitePlayerLevel = await Level.findOne({ where: { levelNumber: whiteLevel } });
-  let isFileFormatCorrect = await correctFileFormat(fileDestination + newFileName);
+  const blackPlayerLevel = await Level.findOne({ where: { value: blackLevel } });
+  const whitePlayerLevel = await Level.findOne({ where: { value: whiteLevel } });
+  let isFileFormatCorrect = await correctFileFormat("./" + fileDestination + newFileName);
   if (visits <= 1000 && blackPlayerLevel && whitePlayerLevel && isFileFormatCorrect) {
 
     let analyzedSGFfile = {
@@ -88,7 +88,7 @@ router.post('/upload', validateToken, multerUploads, async function (req, res) {
     res.json({ AnalyzedSGFfile: analyzedSGFfile });
   } else {
     const fs = require('fs');
-    fs.unlinkSync(fileDestination + newFileName); //delete file
+    fs.unlinkSync("./" + fileDestination + newFileName); //delete file
     res.json({ error: "Bad file format or wrong information provided!" });
   }
 })
@@ -99,7 +99,7 @@ router.post('/download', validateToken, upload.none(), async function (req, res)
   const sgfFile = await AnalyzedSGFfile.findOne({ where: { id: fileId, PlayerUserId: req.user.id } });
   if (sgfFile) {
     const fs = require('fs')
-    const pathFile = __dirname.substring(0, __dirname.length - 11) + "SGFfiles/" + sgfFile.SgfFileName;
+    const pathFile = __dirname.substring(0, __dirname.length - 11) + fileDestination + sgfFile.SgfFileName;
     if (fs.existsSync(pathFile)) {
       res.append('fileName', sgfFile.SgfFileName);
       res.status(200).sendFile(pathFile);
@@ -123,7 +123,7 @@ router.delete("/delete/:fileId", validateToken, async (req, res) => {
   const game = await AnalyzedSGFfile.findOne({ where: { id: FileId, PlayerUserId: req.user.id, Status: 1 } });
   if (game) {
     const fs = require('fs');
-    const pathFileSGF = __dirname.substring(0, __dirname.length - 11) + "SGFfiles\\" + game.SgfFileName;
+    const pathFileSGF = __dirname.substring(0, __dirname.length - 11) + fileDestination + game.SgfFileName;
     const pathFileAnalysis = pathFileSGF.substring(0, pathFileSGF.length - 4) + "_analyze.txt";
     await AnalyzedGame.destroy({
       where: {
@@ -277,8 +277,8 @@ async function getMovesFromSGFfile(filePath) {
         "posLeela1": posLeela1,
         "posLeela2": posLeela2,
         "posLeela": posLeela1 == "pass" ? posLeela1 : posLeela1 + posLeela2,
-        "time": moveStrT,
-        "other_Time": moveStrOT,
+        "main_time": moveStrT,
+        "other_time": moveStrOT,
         "handicapStone": false,
         "description": moveStr,
       }

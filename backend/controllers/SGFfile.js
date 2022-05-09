@@ -37,9 +37,19 @@ function checkFileType(file, cb) {
   }
 }
 
+function createDirectory() {
+  var fs = require('fs');
+  var dir = "./" + fileDestination;
+  
+  if (!fs.existsSync(dir)){
+      fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
 const multerUploads = multer({
   storage: storage,
   fileFilter: function (req, file, cb) {
+    createDirectory();
     checkFileType(file, cb);
   },
 }).single("file");

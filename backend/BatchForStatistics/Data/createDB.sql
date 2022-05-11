@@ -1,7 +1,6 @@
 
-DROP DATABASE IF EXISTS `GoStatistics`;
-CREATE DATABASE IF NOT EXISTS `GoStatistics` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `GoStatistics`;
+--Create manually the DB GoStatistics.db
+--then import this file:
 
 CREATE TABLE `StatSGFfile` (
     `Id` INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -28,7 +27,7 @@ CREATE TABLE `StatGame` (
 	FOREIGN KEY(SGFfileId) REFERENCES SGFfile(Id) ON DELETE CASCADE
 );
 
-
+-- -- To import all data:
 -- SELECT * 
 -- FROM StatSGFfile sgf
 -- LEFT JOIN StatGame game ON game.SGFfileId = sgf.Id

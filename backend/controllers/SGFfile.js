@@ -208,6 +208,41 @@ async function getLevelsFromSGFfile(filePath) {
 
 }
 
+//To add handicap stones: to test
+async function getHandicapStones(filePath) {
+  let arrayOfMovesObj = new Array();
+  const alphaNormal = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's'];
+  const alphaLeela = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']; //pas de i !!!!
+
+  let movesBin = await loadFileContent(filePath);
+  let movesStr = movesBin.toString();
+  let arrayOfGameInfoStr = movesStr.split(";");
+  
+  console.log(arrayOfGameInfoStr);
+  let AB = arrayOfGameInfoStr[1].split("AB[");
+  let handStones = AB[1].split("[");
+  handStones.forEach(hs => {
+    console.log(hs);
+    let positionFile = hs.split("]")[0];
+    let posLeela1 = alphaLeela[alphaNormal.indexOf(positionFile.charAt(0))];
+    let posLeela2 = 19 - alphaNormal.indexOf(positionFile.charAt(1));
+    let moveObj =
+    {
+      "colorShort": "B",
+      "colorLong": "black",
+      "positionFile": positionFile,
+      "posLeela1": posLeela1,
+      "posLeela2": posLeela2,
+      "posLeela": posLeela1 + posLeela2,
+      "time": 0,
+      "handicapStone": true,
+    }
+    arrayOfMovesObj.push(moveObj);
+  })
+  return arrayOfMovesObj;
+}
+
+
 async function getMovesFromSGFfile(filePath) {
   let arrayOfMovesObj = new Array();
   const alphaNormal = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's'];
@@ -217,43 +252,18 @@ async function getMovesFromSGFfile(filePath) {
   let movesStr = movesBin.toString();
   let arrayOfGameInfoStr = movesStr.split(";");
 
-  //To add handicap stones:
-  // console.log(arrayOfGameInfoStr);
-  // let AB = arrayOfGameInfoStr[1].split("AB[");
-  // let handStones = AB[1].split("[");
-  // handStones.forEach(hs => {
-  //   console.log(hs);
-  //   let positionFile = hs.split("]")[0];
-  //   let posLeela1 = alphaLeela[alphaNormal.indexOf(positionFile.charAt(0))];
-  //   let posLeela2 = 19 - alphaNormal.indexOf(positionFile.charAt(1));
-  //   let moveObj =
-  //   {
-  //     "colorShort": "B",
-  //     "colorLong": "black",
-  //     "positionFile": positionFile,
-  //     "posLeela1": posLeela1,
-  //     "posLeela2": posLeela2,
-  //     "posLeela": posLeela1 + posLeela2,
-  //     "time": 0,
-  //     "handicapStone": true,
-  //   }
-  //   arrayOfMovesObj.push(moveObj);
-  // })
-
   let endOfMainMoves = false;
   let i = 2;
   while (i < arrayOfGameInfoStr.length && !endOfMainMoves) {
-    //for (let i = 2; i < arrayOfGameInfoStr.length; ++i) {
     let moveStr = arrayOfGameInfoStr[i];
     if (moveStr.includes("[") && moveStr.includes("]")) {
 
-      //Take into account only the first variations of the game:
+      //Take into account only the first variation of the game:
       let moveStrWOLF = moveStr.replace(/\n/g, '').replace(/\r/g, '');
       let markEndOfMainMoves = moveStrWOLF.substring(moveStrWOLF.length - 2, moveStrWOLF.length);
       if (markEndOfMainMoves == ")(") {
         endOfMainMoves = true;
       }
-
 
       let colorShort = moveStr.includes("W[") ? "W" : moveStr.includes("B[") ? "B" : "none";
       let positionFile = "";
@@ -278,7 +288,7 @@ async function getMovesFromSGFfile(filePath) {
         posLeela1 = alphaLeela[alphaNormal.indexOf(positionFile.charAt(0))];
         posLeela2 = 19 - alphaNormal.indexOf(positionFile.charAt(1));
       }
-      //posLeela1 = String.fromCharCode(positionFile.charAt(0).charCodeAt(0)+1);
+
       let moveObj =
       {
         "colorShort": colorShort,

@@ -7,20 +7,26 @@ const { sign } = require("jsonwebtoken");
 
 router.post("/", async (req, res) => {
   const { firstName, lastName, email, password, level } = req.body;
-  bcrypt.hash(password, 10).then(async (hash) => {
-    const user = await User.create({
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      password: hash,
+
+  const userWithSameEmail = await User.findOne({ where: { email: email } });
+  if (userWithSameEmail){
+    res.json({ error: "Email is already in use" });
+  }else{
+    bcrypt.hash(password, 10).then(async (hash) => {
+      const user = await User.create({
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        password: hash,
+      });
+      const playerLevel = await Level.findOne({ where: { value: level } });
+      await Player.create({
+        UserId: user.id,
+        LevelId: playerLevel.id,
+      });
+      res.json("SUCCESS");
     });
-    const playerLevel = await Level.findOne({ where: { levelNumber: level } });
-    await Player.create({
-      UserId: user.id,
-      LevelId: playerLevel.id,
-    });
-    res.json("SUCCESS");
-  });
+  }
 });
 
 router.post("/login", async (req, res) => {
@@ -28,19 +34,23 @@ router.post("/login", async (req, res) => {
 
   const user = await User.findOne({ where: { email: email } });
 
-  if (!user) res.json({ error: "User doesn't exist" });
+  if (!user) {
+    res.json({ error: "User doesn't exist" });
+  } else {
+    const isUserManager = await isManager(user.id);
 
-  const isUserManager = await isManager(user.id);
-  bcrypt.compare(password, user.password).then(async (match) => {
-    if (!match) res.json({ error: "Wrong email and password combination" });
-
-    const accessToken = sign( //ici qu'on enregistre l'utilisateur dans le token?
-      { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, isManager: isUserManager },
-      //"importantsecret"
-      "AYU3Gigiu33FYFuFkg786uiDY6164hguisdqsf264qsf68RgcjKj75hooLGF99"
-    );
-    res.json({ token: accessToken, id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, isManager: isUserManager });
-  });
+    bcrypt.compare(password, user.password).then(async (match) => {
+      if (!match){
+        res.json({ error: "Wrong email and password combination" });
+      } else{
+        const accessToken = sign(
+          { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, isManager: isUserManager },
+          "CleSecreteDeOpenGoLeagues"
+        );
+        res.json({ token: accessToken, id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, isManager: isUserManager });
+      }
+    });
+  }
 });
 
 router.get("/auth", validateToken, async (req, res) => { //validateToken : uniquement pour les personnes connectées

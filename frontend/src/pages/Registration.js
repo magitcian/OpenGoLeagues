@@ -5,7 +5,7 @@ import * as Yup from "yup";
 import axios from "axios";
 import { url } from "../helpers/URLContext";
 import Select from 'react-select'
-import { useNavigate  } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Registration() {
   const { setAuthState } = useContext(AuthContext);
@@ -29,7 +29,7 @@ function Registration() {
   const validationSchema = Yup.object().shape({
     firstName: Yup.string().min(3).max(15).required(),
     lastName: Yup.string().min(3).max(15).required(),
-    email: Yup.string().min(3).max(15).required(),
+    email: Yup.string().min(3).max(100).required(),
     password: Yup.string().min(12).max(50).required(),
     passwordConfirmation: Yup.string().oneOf([Yup.ref('password'), null], 'Passwords must match'),
     level: Yup.string().required("You must select a level!"),
@@ -57,8 +57,12 @@ function Registration() {
   };
 
   const onSubmit = (data) => {
-    axios.post(url + "auth", data).then(() => {
-      login(data.email, data.password);
+    axios.post(url + "auth", data).then((response) => {
+      if (response.data.error) {
+        alert(response.data.error);
+      } else {
+        login(data.email, data.password);
+      }
     });
   };
 
@@ -75,7 +79,7 @@ function Registration() {
           <Form className="formContainer">
 
             <label>Firstname: </label>
-            <ErrorMessage name="firstName" component="span" className='error'/>
+            <ErrorMessage name="firstName" component="span" className='error' />
             <Field
               autoComplete="off"
               className="inputCreatePost"
@@ -84,7 +88,7 @@ function Registration() {
             />
 
             <label>Lastname: </label>
-            <ErrorMessage name="lastName" component="span" className='error'/>
+            <ErrorMessage name="lastName" component="span" className='error' />
             <Field
               autoComplete="off"
               className="inputCreatePost"
@@ -93,7 +97,7 @@ function Registration() {
             />
 
             <label>Email: </label>
-            <ErrorMessage name="email" component="span" className='error'/>
+            <ErrorMessage name="email" component="span" className='error' />
             <Field
               autoComplete="off"
               className="inputCreatePost"
@@ -102,7 +106,7 @@ function Registration() {
             />
 
             <label>Password: </label>
-            <ErrorMessage name="password" component="span" className='error'/>
+            <ErrorMessage name="password" component="span" className='error' />
             <Field
               autoComplete="off"
               type="password"
@@ -112,7 +116,7 @@ function Registration() {
             />
 
             <label>Rewrite password: </label>
-            <ErrorMessage name="passwordConfirmation" component="span" className='error'/>
+            <ErrorMessage name="passwordConfirmation" component="span" className='error' />
             <Field
               autoComplete="off"
               type="password"
@@ -122,7 +126,7 @@ function Registration() {
             />
 
             <label>Your level: </label>
-            <ErrorMessage name="level" component="span" className='error'/>
+            <ErrorMessage name="level" component="span" className='error' />
             <Select name="level" options={options} onChange={(e) => { level = e.value; setFieldValue("level", e.value) }} />
 
             <button type="submit"> Register</button>

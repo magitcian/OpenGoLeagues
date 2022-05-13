@@ -66,7 +66,7 @@ async function deleteDataInDB() {
 
 async function addDataInDB() {
   //add data in level table:
-  let levels = ["20K", "15k", "10k", "5k", "4k", "3k", "2k", "1k", "1d", "2d", "3d", "4d", "5d", "6d", "7d", "8d", "9d"]
+  let levels = ["20k", "15k", "10k", "5k", "4k", "3k", "2k", "1k", "1d", "2d", "3d", "4d", "5d", "6d", "7d", "8d", "9d"]
   let idLevel = 0;
   levels.forEach(async (l) => {
     ++idLevel;

@@ -20,19 +20,19 @@ function CheatAnalysis() {
   const { authState } = useContext(AuthContext);
   let navigate = useNavigate();
   const [listOfAnalyzedSGFfile, setListOfAnalyzedSGFfile] = useState([]);
-  const [blackLevel, setBlackLevel] = useState("");
-  const [whiteLevel, setWhiteLevel] = useState("");
+  const [blackLevelValue, setBlackLevelValue] = useState("");
+  const [whiteLevelValue, setWhiteLevelValue] = useState("");
   const [visits, setVisits] = useState("");
 
-  let levelOptions = [{ value: -20, label: "20K" }, { value: -15, label: '15k' }, { value: -10, label: '10k' }, { value: -5, label: '5k' },
+  let levelOptions = [{ value: -20, label: "20k" }, { value: -15, label: '15k' }, { value: -10, label: '10k' }, { value: -5, label: '5k' },
   { value: -4, label: '4k' }, { value: -3, label: '3k' }, { value: -2, label: '2k' }, { value: -1, label: '1k' }, { value: 0, label: '1d' },
   { value: 1, label: '2d' }, { value: 2, label: '3d' }, { value: 3, label: '4d' }, { value: 4, label: '5d' }, { value: 5, label: '6d' },
   { value: 6, label: '7d' }, { value: 7, label: '8d' }, { value: 8, label: '9d' }]
   let visitsOptions = [{ value: 100, label: "100" }, { value: 500, label: '500' }, { value: 1000, label: '1000' }]
   const initialValues = {
     file: "",
-    blackLevel: blackLevel,
-    whiteLevel: whiteLevel,
+    blackLevelValue: blackLevelValue,
+    whiteLevelValue: whiteLevelValue,
     visits: visits,
   };
 
@@ -53,8 +53,8 @@ function CheatAnalysis() {
 
   const validationSchema = Yup.object().shape({
     file: Yup.string().required("You must input a file!"),
-    blackLevel: Yup.string().required("You must select a black level!"),
-    whiteLevel: Yup.string().required("You must select a white level!"),
+    blackLevelValue: Yup.string().required("You must select a black level!"),
+    whiteLevelValue: Yup.string().required("You must select a white level!"),
     visits: Yup.string().required("You must select a number of visits!"),
   });
 
@@ -63,11 +63,11 @@ function CheatAnalysis() {
 
   const uploadFile = (e) => {
     //console.log(blackLevel);
-    if (blackLevel !== -1000 && whiteLevel !== -1000) {
+    if (blackLevelValue !== -1000 && whiteLevelValue !== -1000) {
       let formData = new FormData()
       formData.append('file', sgfFile.data)
-      formData.append('blackLevel', blackLevel);
-      formData.append('whiteLevel', whiteLevel);
+      formData.append('blackLevelValue', blackLevelValue);
+      formData.append('whiteLevelValue', whiteLevelValue);
       formData.append('visits', visits);
       fetch(url + 'sgfFile/upload', {
         method: 'POST',
@@ -197,24 +197,24 @@ function CheatAnalysis() {
               <input type='file' name='file' onChange={(e) => { handleFileChange(e); setFieldValue("file", "new file") }}></input>
 
               <label>Select black level: </label>
-              <ErrorMessage name="blackLevel" component="span" className='error' />
+              <ErrorMessage name="blackLevelValue" component="span" className='error' />
               <Select
-                name="blackLevel"
+                name="blackLevelValue"
                 placeholder="Select black level"
-                value={levelOptions.find(obj => obj.value === blackLevel)}
+                value={levelOptions.find(obj => obj.value === blackLevelValue)}
                 options={levelOptions}
                 //setFieldValue pour gérer les erreurs et setBlackLevel pour obtenir la valeur:
-                onChange={(e) => { setFieldValue("blackLevel", e.value); setBlackLevel(e.value) }}
+                onChange={(e) => { setFieldValue("blackLevelValue", e.value); setBlackLevelValue(e.value) }}
               />
 
               <label>Select white level: </label>
-              <ErrorMessage name="whiteLevel" component="span" className='error' />
+              <ErrorMessage name="whiteLevelValue" component="span" className='error' />
               <Select
-                name="whiteLevel"
+                name="whiteLevelValue"
                 placeholder="Select white level"
-                value={levelOptions.find(obj => obj.value === whiteLevel)}
+                value={levelOptions.find(obj => obj.value === whiteLevelValue)}
                 options={levelOptions}
-                onChange={(e) => { setFieldValue("whiteLevel", e.value); setWhiteLevel(e.value) }}
+                onChange={(e) => { setFieldValue("whiteLevelValue", e.value); setWhiteLevelValue(e.value) }}
               />
 
               <label>Select number of visits: </label>
@@ -286,7 +286,7 @@ function CheatAnalysis() {
                         {game.Color === "b" ? "Black" : "White"}
                       </td>
                       <td >
-                        {levelOptions.find(o => o.value == game.Level).label}
+                        {levelOptions.find(o => o.value == game.LevelValue).label}
                       </td>
                       <td >
                         {!asgf.Status ? "pending analysis" : game["1stChoice"]}

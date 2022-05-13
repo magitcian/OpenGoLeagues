@@ -55,9 +55,9 @@ const multerUploads = multer({
 }).single("file");
 
 router.post('/upload', validateToken, multerUploads, async function (req, res) {
-  const { blackLevel, whiteLevel, visits } = req.body;
-  const blackPlayerLevel = await Level.findOne({ where: { value: blackLevel } });
-  const whitePlayerLevel = await Level.findOne({ where: { value: whiteLevel } });
+  const { blackLevelValue, whiteLevelValue, visits } = req.body;
+  const blackPlayerLevel = await Level.findOne({ where: { value: blackLevelValue } });
+  const whitePlayerLevel = await Level.findOne({ where: { value: whiteLevelValue } });
   let isFileFormatCorrect = await correctFileFormat("./" + fileDestination + newFileName);
   if (visits <= 1000 && blackPlayerLevel && whitePlayerLevel && isFileFormatCorrect) {
 
@@ -75,7 +75,7 @@ router.post('/upload', validateToken, multerUploads, async function (req, res) {
     let blackGame = {
       "AnalyzedSGFfileId": analyzedSGFfileReturn.id,
       "Color": "b",
-      "Level": blackLevel,
+      "LevelValue": blackLevelValue,
       "1stChoice": 0,
       "2ndChoice": 0,
       "TotalAnalyzedMoves": 0,
@@ -85,7 +85,7 @@ router.post('/upload', validateToken, multerUploads, async function (req, res) {
     let whiteGame = {
       "AnalyzedSGFfileId": analyzedSGFfileReturn.id,
       "Color": "w",
-      "Level": whiteLevel,
+      "LevelValue": whiteLevelValue,
       "1stChoice": 0,
       "2ndChoice": 0,
       "TotalAnalyzedMoves": 0,

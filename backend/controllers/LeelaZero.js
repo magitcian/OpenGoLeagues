@@ -190,45 +190,35 @@ function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {
         }
     }
 
-    let blackLevel = sgfFile.AnalyzedGames.find(g => g.Color == "b") ? sgfFile.AnalyzedGames.find(g => g.Color == "b").Level : undefined;
-    let whiteLevel = sgfFile.AnalyzedGames.find(g => g.Color == "w") ? sgfFile.AnalyzedGames.find(g => g.Color == "w").Level : undefined;
+    let blackLevelValue = sgfFile.AnalyzedGames.find(g => g.Color == "b") ? sgfFile.AnalyzedGames.find(g => g.Color == "b").LevelValue : undefined;
+    let whiteLevelValue = sgfFile.AnalyzedGames.find(g => g.Color == "w") ? sgfFile.AnalyzedGames.find(g => g.Color == "w").LevelValue : undefined;
 
     visitsAverage = Math.floor(visitsAverage / countMove);
-    let blackMatchRateOfMoves1 = ((black1stChoice) / (black1stChoice + black2ndChoice + blackNot12Choice) * 100).toFixed(2);
-    let blackTotalAnalyzedMoves = black1stChoice + black2ndChoice + blackNot12Choice;
-    let isBlackCheating = false;
-    if ((blackMatchRateOfMoves1 > 85 && blackLevel < 6) || blackMatchRateOfMoves1 > (3.324 * blackLevel + 58.78)) {
-        isBlackCheating = true;
-    }
 
-    let whiteMatchRateOfMoves1 = ((white1stChoice) / (white1stChoice + white2ndChoice + whiteNot12Choice) * 100).toFixed(2);
-    let whiteTotalAnalyzedMoves = white1stChoice + white2ndChoice + whiteNot12Choice;
-    let isWhiteCheating = false;
-    if ((whiteMatchRateOfMoves1 > 85 && whiteLevel < 6) || whiteMatchRateOfMoves1 > (3.324 * whiteLevel + 58.78)) {
-        isWhiteCheating = true;
-    }
-
-    let b = {
+    let blackPlayer = {
         "Color": "b",
-        "Level": blackLevel,
+        "LevelValue": blackLevelValue,
         "1stChoice": black1stChoice,
         "2ndChoice": black2ndChoice,
-        "TotalAnalyzedMoves": blackTotalAnalyzedMoves,
+        "TotalAnalyzedMoves": black1stChoice + black2ndChoice + blackNot12Choice,
         "UnexpectedMoves": blackUnexpectedMoves,
-        "IsCheating": isBlackCheating,
+        "IsCheating": false,
     }
-    let w = {
+    checkIfCheating(blackPlayer);
+
+    let whitePlayer = {
         "Color": "w",
-        "Level": whiteLevel,
+        "LevelValue": whiteLevelValue,
         "1stChoice": white1stChoice,
         "2ndChoice": white2ndChoice,
-        "TotalAnalyzedMoves": whiteTotalAnalyzedMoves,
+        "TotalAnalyzedMoves": white1stChoice + white2ndChoice + whiteNot12Choice,
         "UnexpectedMoves": whiteUnexpectedMoves,
-        "IsCheating": isWhiteCheating,
+        "IsCheating": false,
     }
+    checkIfCheating(whitePlayer);
 
     let analyzedSGFfile = {
-        "AnalyzedGames": [b, w],
+        "AnalyzedGames": [blackPlayer, whitePlayer],
         "id": sgfFile.id,
         "SgfFileName": sgfFile.SgfFileName,
         "PlayerUserId": sgfFile.PlayerUserId,
@@ -237,6 +227,14 @@ function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {
     }
     //console.log(analyzedGame);
     return analyzedSGFfile;
+}
+
+function checkIfCheating(player) {
+    let MatchRateOfMoves1 = (player["1stChoice"] / player.TotalAnalyzedMoves * 100).toFixed(2);
+    let above3StandardDeviations = MatchRateOfMoves1 > (3.324 * player.LevelValue + 58.78); //    //The formula was calculated based on statistical analyzes
+    if ((MatchRateOfMoves1 > 85 && player.LevelValue < 6) || above3StandardDeviations) {
+        player.IsCheating = true;
+    }
 }
 
 async function getProposedMovesFromAnalysisFile(analysisFilePath) {

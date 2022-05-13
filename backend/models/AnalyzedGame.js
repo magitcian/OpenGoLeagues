@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        Level: {
+        LevelValue: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },

@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        SGFilePath: {
+        SGFfilePath: {
             type: DataTypes.STRING,
             allowNull: false,
         },

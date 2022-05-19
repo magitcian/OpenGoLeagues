@@ -12,8 +12,8 @@ let listOfFiles = [];
 launch();
 
 async function launch() {
-  //let nodePath = prompt('Which folder to analyse ?'); //D:\TempWork\testLeela\parties
-  let nodePath = "D:/TempWork/testLeela/parties/batch_1_kgs_dan_long_games"; //"D:/TempWork/testLeela/parties/liusasori-omerkazanc.sgf"; "D:/TempWork/testLeela/parties/2021";
+  let nodePath = prompt('Which folder to analyse ?'); // D:\TempWork\testLeela\parties
+  //let nodePath = "D:/TempWork/testLeela/parties/PetGo";
   if (fs.existsSync(nodePath)) {
     const path = require('path').dirname(nodePath);
     const nodeName = nodePath.substring(path.length + 1);

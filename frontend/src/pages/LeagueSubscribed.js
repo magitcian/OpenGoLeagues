@@ -45,10 +45,14 @@ function Home() {
   return (
     <div className='App'>
       <h1 className="leaguesTitle">Leagues where you are registered</h1>
-      {listOfSubscribes.length == 0
-        ? <p>You are not registered to any leagues!</p>
-        : ""
-      }
+      <div className="Paragraph">
+        <p>Here you can find the information about the leagues you play in, the results and current status of these leagues and also the past leagues which are over now.</p>
+        {listOfSubscribes.length == 0
+          ? <p>You are not registered to any leagues!</p>
+          : ""
+        }
+      </div>
+
       {listOfSubscribes.map((value, key) => {
         return (
           <div key={key} className="league">

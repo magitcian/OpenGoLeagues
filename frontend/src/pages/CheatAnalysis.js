@@ -217,7 +217,7 @@ function CheatAnalysis() {
                 onChange={(e) => { setFieldValue("whiteLevelValue", e.value); setWhiteLevelValue(e.value) }}
               />
 
-              <label>Select number of visits: </label>
+              <label>Select number of visits (the depth of analysis): </label>
               <ErrorMessage name="visits" component="span" className='error' />
               <Select
                 name="visits"
@@ -241,16 +241,16 @@ function CheatAnalysis() {
           <thead>
             <tr>
               <th>  </th>
-              <th>FileName</th>
-              <th>Visits average</th>
-              <th>Color</th>
-              <th>Level</th>
-              <th data-tip="1st move correspondances">1st move correspondances</th>
-              <th data-tip="2nd move correspondances">2nd move correspondances</th>
-              <th>Unexpected moves</th>
-              <th>Total of moves</th>
-              <th>Rate moves 1</th>
-              <th>Is cheating ?</th>
+              <th>File name</th>
+              <th data-tip="This value represents the depth of analysis: 1000 is more accurate but takes around 15 minutes while 100 takes around 3 minutes.">Visits average</th>
+              <th data-tip="The declared color of the players">Color</th>
+              <th data-tip="The declared level of the players – this must be accurate in order to correctly assess if the player has cheated">Level</th>
+              <th data-tip="The total number of move played which match exactly the first choice of the bot used to analyse the games (here Leelazero 0.17). Note that the analysis is performed only over the first 150 moves of the game.">1st move correspondances</th>
+              <th data-tip="The total number of move played which match exactly the second choice of the bot used to analyse the games (here Leelazero 0.17). Note that the analysis is performed only over the first 150 moves of the game.">2nd move correspondances</th>
+              <th data-tip="The total number of move played which doesn’t match exactly the best choices of the bot used to analyse the games (here Leelazero 0.17). Note that the analysis is performed only over the first 150 moves of the game.">Unexpected moves</th>
+              <th data-tip="The total number of moves analyzed for each player. The sum of analyzed moves for the two players is 150.  Players can have a number of moves analyzed different from 75 due to handicap stones.">Total of moves</th>
+              <th data-tip="This gives the percentage of 1st move correspondance with Leela-Zero 0.17. High values may be an indication a player cheated.">Rate moves 1</th>
+              <th data-tip="This gives you the conclusion of the analyze about the possibility a player cheated. This is based on a wide statistical analysis and a player is declared to have cheated when his results are above the 99% confidence interval for his declared level.">Is cheating ?</th>
 
             </tr>
           </thead>

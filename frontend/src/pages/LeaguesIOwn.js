@@ -28,11 +28,15 @@ function Home() {
 
   return (
     <div className='App'>
-      <h1 className="leaguesTitle">Leagues where you are subscribed</h1>
-      {listOfLeagues.length == 0
-        ? <p>You don't have any leagues!</p>
-        : ""
-      }
+      <h1 className="leaguesTitle">Leagues you manage</h1>
+      <div className="Paragraph">
+        <p>Here you can manage the leagues you own. You can see the players which registered and can accept or refuse them.</p>
+        {listOfLeagues.length == 0
+          ? <p>You don't have any leagues!</p>
+          : ""
+        }
+      </div>
+
       {listOfLeagues.map((value, key) => {
         return (
           <div key={key} className="league league_click"

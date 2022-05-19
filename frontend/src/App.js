@@ -9,6 +9,7 @@ import LeagueSubscribed from "./pages/LeagueSubscribed";
 import LeagueNotSubscribed from "./pages/LeagueNotSubscribed";
 import LeaguesIOwn from "./pages/LeaguesIOwn";
 import CheatAnalysis from "./pages/CheatAnalysis";
+import AnalysisMethodology from "./pages/AnalysisMethodology";
 import ManageLeague from "./pages/ManageLeague";
 import { AuthContext } from "./helpers/AuthContext";
 import { useState, useEffect } from "react";
@@ -81,6 +82,7 @@ function App() {
                                 <Link to="/LeagueSubscribed">Registered leagues</Link>
                                 <Link to="/LeagueNotSubscribed">Other leagues</Link>
                                 <Link to="/CheatAnalysis">Cheat analysis</Link>
+                                <Link to="/AnalysisMethodology">Analysis methodology</Link>
                             </>
                         )}
                     </div>
@@ -102,6 +104,7 @@ function App() {
                             <Route path="/LeagueSubscribed" element={<LeagueSubscribed />} />
                             <Route path="/LeagueNotSubscribed" element={<LeagueNotSubscribed />} />
                             <Route path="/CheatAnalysis" element={<CheatAnalysis />} />
+                            <Route path="/AnalysisMethodology" element={<AnalysisMethodology />} />
                             {authState.isManager && (
                                 <>
                                     <Route path="/LeaguesIOwn" element={<LeaguesIOwn />} />

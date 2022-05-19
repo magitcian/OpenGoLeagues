@@ -300,7 +300,7 @@ div.deleteButtons{
 
 table.playerList
 {
-    border-collapse: collapse; /* Les bordures du tableau seront collées (plus joli) */
+    border-collapse: collapse;
 }
 
 table.playerList td, th
@@ -338,3 +338,26 @@ div.Container{
   max-width: 100%; 
   /* overflow: auto;  */
 }
+
+figure.Statgraph {
+  /* max-width: auto; */
+  max-width: 100%;
+  overflow: auto;
+  text-align: center;
+ }
+
+ img.Statgraph{
+  max-width: 100%;
+  overflow: auto;
+ }
+
+ div.Paragraph{
+  max-width: 50%;
+  font-size: 20px;
+  text-align : justify;
+ }
+
+ h2{
+   font-weight: bold;
+   font-size: 20px;
+ }

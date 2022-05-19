@@ -61,6 +61,9 @@ function Home() {
   return (
     <div className='App'>
       <h1 className="leaguesTitle">Leagues where you are not registered</h1>
+      <div className="Paragraph">
+        <p>Check the list of the currently available leagues here! You can see what other peoples are doing and find leagues that might suit you! Register to them and play online tournaments!</p>
+      </div>
       {listOfLeaguesNotSub.map((value, key) => {
         return (
           <div key={key} className="league">

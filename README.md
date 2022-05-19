@@ -12,11 +12,11 @@ To launch this project in devellopment mode, you must go to the frontend and bac
 Note: you might need to uncomment the commentaries from line 28 - 30 in order to initialize data in DB. When it is done, you will have to change it back to commentary to avoid overwritting.
 
 ## User list:
-Here is the list of all users registered in the system:
-Manager:
--	Email : « gaby@epfc.eu”, password : « Password1, »
--	Email : « sev@epfc.eu”, password : « Password1, »
-Player:
--	Email : « player1@epfc.eu”, password : « Password1, »
--	Email : « player2@epfc.eu”, password : « Password1, »
--	Email : « test@epfc.eu”, password : « Password1, »
+Here is the list of all users registered in the system:  
+Manager:  
+-	Email : "gaby@epfc.eu", password : "Password1,"  
+-	Email : "sev@epfc.eu", password : "Password1,"  
+Player:  
+-	Email : "player1@epfc.eu", password : "Password1,"  
+-	Email : "player2@epfc.eu", password : "Password1,"  
+-	Email : "test@epfc.eu", password : "Password1,"  

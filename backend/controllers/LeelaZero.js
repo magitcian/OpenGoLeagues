@@ -231,7 +231,7 @@ function getAnalyzedGame(sgfFile, listOfMoves, listOfLeelazMoves) {
 
 function checkIfCheating(player) {
     let MatchRateOfMoves1 = (player["1stChoice"] / player.TotalAnalyzedMoves * 100).toFixed(2);
-    let above3StandardDeviations = MatchRateOfMoves1 > (3.324 * player.LevelValue + 58.78); //    //The formula was calculated based on statistical analyzes
+    let above3StandardDeviations = MatchRateOfMoves1 > (2.4538 * player.LevelValue + 52.792); //The formula was calculated based on statistical analyzes : y = 2,4538 x + 52,792
     if ((MatchRateOfMoves1 > 85 && player.LevelValue < 6) || above3StandardDeviations) {
         player.IsCheating = true;
     }

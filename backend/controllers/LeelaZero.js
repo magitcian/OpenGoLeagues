@@ -4,10 +4,11 @@ const cors = require('cors')
 const { User, AnalyzedSGFfile, AnalyzedGame } = require("../models");
 const { validateToken } = require("../middlewares/AuthMiddleware");
 const sgfFileController = require("./SGFfile");
-const OStype = "w"; // l for linux
+const OStype = "w"; // w for windows - l for linux
 const NumOfMovesToAnalyze = 150;
 
 router.post('/analyzed', validateToken, async function (req, res) {
+    res.socket.setTimeout(0); //to avoid throwing twice
     const { fileId } = req.body;
     const sgfFile = await AnalyzedSGFfile.findOne({
         where: { id: fileId, PlayerUserId: req.user.id, status: 0 },
@@ -86,11 +87,16 @@ function createAnalysisFileWithLeela(filePath, sgfFile) {
             rep_analyze += curRep;
             console.log(curRep);
             if ((prevRep + curRep).includes("visits,")) {
-                ++i;
-                bat.stdin.write(i.toString() + " undo \n");
-                await sleep(sleep0p5S);
-                ++i;
-                bat.stdin.write(i.toString() + " lz-analyze 0 \n");
+                try{
+                    ++i;
+                    bat.stdin.write(i.toString() + " undo \n");
+                    await sleep(sleep0p5S);
+                    ++i;
+                    bat.stdin.write(i.toString() + " lz-analyze 0 \n");
+                }
+                catch(e){
+                    console.log("bat.stdin : ", e);
+                }
                 prevRep = "";
             } else {
                 prevRep = curRep;

@@ -23,6 +23,7 @@ function CheatAnalysis() {
   const [blackLevelValue, setBlackLevelValue] = useState("");
   const [whiteLevelValue, setWhiteLevelValue] = useState("");
   const [visits, setVisits] = useState("");
+  const [isDisabled, setDisabled] = useState(false);
 
   let levelOptions = [{ value: -20, label: "20k" }, { value: -15, label: '15k' }, { value: -10, label: '10k' }, { value: -5, label: '5k' },
   { value: -4, label: '4k' }, { value: -3, label: '3k' }, { value: -2, label: '2k' }, { value: -1, label: '1k' }, { value: 0, label: '1d' },
@@ -47,6 +48,9 @@ function CheatAnalysis() {
         .then((response) => {
           console.log(response.data);
           setListOfAnalyzedSGFfile(response.data.listOfAnalyzedSGFfile);
+          // if(!response.data.listOfAnalyzedSGFfile[0].Status){
+          //   setDisabled(true);
+          // }
         });
     }
   }, []);
@@ -64,6 +68,7 @@ function CheatAnalysis() {
   const uploadFile = (e) => {
     //console.log(blackLevel);
     if (blackLevelValue !== -1000 && whiteLevelValue !== -1000) {
+      setDisabled(true);
       let formData = new FormData()
       formData.append('file', sgfFile.data)
       formData.append('blackLevelValue', blackLevelValue);
@@ -95,6 +100,7 @@ function CheatAnalysis() {
                     return game.id != response.data.AnalyzedSGFfile.id;
                   })
                 ]);
+                setDisabled(false);
               });
           } else {
             alert(response.error);
@@ -227,7 +233,7 @@ function CheatAnalysis() {
                 onChange={(e) => { setFieldValue("visits", e.value); setVisits(e.value) }}
               />
 
-              <button type="submit">Send file to analyse</button>
+              <button type="submit" disabled={isDisabled}>Send file to analyse</button>
             </Form>
           )}
         </Formik>

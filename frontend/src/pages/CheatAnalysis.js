@@ -93,6 +93,7 @@ function CheatAnalysis() {
                 {
                   headers: { accessToken: localStorage.getItem("accessToken") },
                 },
+                {timeout: 2000000},
               ).then((response) => {
                 console.log(response.data);
                 setListOfAnalyzedSGFfile([response.data.AnalyzedSGFfile, ...
